@@ -1,0 +1,30 @@
+rint IS OPERATION Min Max {
+  first floor ((random 1) * (Max - Min)) + Min }
+
+mtx IS OPERATION Height Width {
+  EACH rint (Height Width reshape single 0 2) }
+
+nbs IS OPERATION Position Board {
+  Row := first Position ;
+  Col := second Position ;
+  Posx := [(Row - 1) (Col - 1), (Row - 1) Col,
+           (Row - 1) (Col + 1), Row (Col - 1),
+            Row (Col + 1), (Row + 1) (Col - 1),
+           (Row + 1) Col, (Row + 1) (Col + 1)] ;
+  Posx := Posx EACHLEFT in grid Board sublist Posx ;
+  sum (Posx EACHLEFT pick Board) }
+
+sums IS OPERATION Board {
+  (grid Board) EACHLEFT nbs Board }
+   
+ncell IS OPERATION State Neighbors {
+  IF (State = 0) and (Neighbors = 3) THEN
+    1
+  ELSEIF (State = 1) and not (Neighbors in 2 3) THEN
+    0
+  ELSE
+    State
+  ENDIF }
+
+next IS OPERATION Board {
+  Board EACHBOTH ncell (sums Board) }

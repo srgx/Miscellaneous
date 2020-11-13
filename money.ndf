@@ -1,0 +1,20 @@
+Initial_amount := 100000 ;
+
+Months := 120 ;
+
+I := 5 / 1200 + 1 ;
+
+Ipm := I power Months ;
+
+Rt := Ipm - 1 / (I - 1) ;
+
+Mn1 := 1060.66 ; Mn2 := 1000 ;
+
+D1 := Ipm * Initial_amount - (Mn1 * Rt) ;
+D2 := Ipm * Initial_amount - (Mn2 * Rt) ;
+
+write D1 ; write D2 ;
+
+Mp := Initial_amount * Ipm * (I - 1) / (Ipm - 1) ;
+
+write Mp ;

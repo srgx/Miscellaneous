@@ -1,5 +1,5 @@
 # Gists
-Different small programs
+Various small programs
 
 ## Table of Contents
 

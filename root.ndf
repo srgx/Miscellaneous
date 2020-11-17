@@ -1,40 +1,57 @@
 slv IS OPERATION Simul {
-  Output := [] ;
-  Redux := [] ; N := tally Simul ;
-  FOR I WITH (reverse tell N) DO
-    FOR J WITH (reverse tell (I + 1)) DO
+%;
+  Output := [] ; Redux := [] ; N := tally Simul ;
+%;
+  FOR I WITH reverse tell N DO
+%;
+    FOR J WITH reverse tell (I + 1) DO
       IF not mate (J I reach Simul) 0 THEN
         Row := J pick Simul ; EXIT '' ;
       ENDIF ;
     ENDFOR ;
+%;
     IF empty Row THEN
       Output := 'No unique solution' ; EXIT '' ;
     ELSE
-      NewRow := Row / (I pick Row) ;
-      Redux := NewRow hitch Redux ;
-      Simul := Simul except solitary Row ;
+      Simul := Simul except single Row ;
+      Row := Row / (I pick Row) ;
+      Redux := Row hitch Redux ;
       FOR J WITH reverse grid Simul DO
         IF not mate (J I reach Simul) 0 THEN
-          Simul@J := Simul@J - (NewRow * (J I reach Simul)) ;
+          Simul@J := Simul@J - (J I reach Simul * Row) ;
         ENDIF ;
       ENDFOR ;
     ENDIF ;
+%;
   ENDFOR ;
-  IF not empty Output THEN
-    Output
-  ELSE
-    Output := N reshape 1 ;
-    FOR I WITH (tell N) DO
-      Sum := 0 ; J := 0 ;
-      WHILE J < I  DO
-        Sum := (I J reach Redux) * (J pick Output) + Sum ;
-        J := J + 1 ;
-      ENDWHILE ;
-      Output@I := (I N reach Redux) - Sum ;
+%;
+  Output := N reshape 0 ;
+  FOR I WITH tell N DO
+    Sum := 0 ;
+    FOR J WITH tell I  DO
+      Sum := I J reach Redux * (J pick Output) + Sum ;
     ENDFOR ;
-    Output
-  ENDIF }
+    Output@I := I N reach Redux - Sum ;
+  ENDFOR ;
+%;
+  Output }
 
-A := [3 2 2, 2 5 16] ;
-B := [3 10 2,5 6 14] ;
-C := [1 3 10,5 -2 -1] ;
+
+Main IS {
+%;
+  % -2. 4. ;
+  A := [3 2 2, 2 5 16] ;
+%;
+  % 4. -1. ;
+  B := [3 10 2,5 6 14] ;
+%;
+  % 1. 3. ;
+  C := [1 3 10,5 -2 -1] ;
+%;
+  EACH slv A B C }
+  
+
+
+
+
+

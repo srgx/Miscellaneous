@@ -1,4 +1,13 @@
 # Gists
+
+* Barnsley Fern
+
+![Fern](https://i.imgur.com/xEhQxWb.png)
+
+* Game of Life
+
+![Life](https://i.imgur.com/MaaN8vt.png)
+
 Various small programs
 
 ## Table of Contents

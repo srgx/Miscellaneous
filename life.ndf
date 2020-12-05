@@ -1,10 +1,14 @@
-rint IS OPERATION Min Max {
+
+% Get random integer X, Min <= X < Max ;
+randominteger IS OPERATION Min Max {
   first floor ((random 1) * (Max - Min)) + Min }
 
-mtx IS OPERATION Height Width {
-  EACH rint (Height Width reshape single 0 2) }
+% Create random array of 0s and 1s ;
+createarray IS OPERATION Height Width {
+  EACH randominteger (Height Width reshape single 0 2) }
 
-nbs IS OPERATION Position Board {
+% Check how many neighbors cell has ;
+countneighbors IS OPERATION Position Board {
   Row := first Position ;
   Col := second Position ;
   Posx := [(Row - 1) (Col - 1), (Row - 1) Col,
@@ -13,11 +17,14 @@ nbs IS OPERATION Position Board {
            (Row + 1) Col, (Row + 1) (Col + 1)] ;
   Posx := Posx EACHLEFT in grid Board sublist Posx ;
   sum (Posx EACHLEFT pick Board) }
+  
+  
+% Create array with with number of neighbors for every cell ;
+allneighbors IS OPERATION Board {
+  (grid Board) EACHLEFT countneighbors Board }
 
-sums IS OPERATION Board {
-  (grid Board) EACHLEFT nbs Board }
-   
-ncell IS OPERATION State Neighbors {
+% Find new cell state ;
+nextcell IS OPERATION State Neighbors {
   IF (State = 0) and (Neighbors = 3) THEN
     1
   ELSEIF (State = 1) and not (Neighbors in 2 3) THEN
@@ -26,5 +33,17 @@ ncell IS OPERATION State Neighbors {
     State
   ENDIF }
 
-next IS OPERATION Board {
-  Board EACHBOTH ncell (sums Board) }
+% Find new board state ;
+nextboard IS OPERATION Board {
+  Board EACHBOTH nextcell (allneighbors Board) }
+  
+spaces IS { write '---------------' ; }
+  
+main IS {
+  Brd := createarray 7 7 ; write Brd ; spaces ;
+  FOR I WITH count 4 DO
+    Brd := nextboard Brd ; write Brd ; spaces ;
+  ENDFOR ; }
+  
+
+  

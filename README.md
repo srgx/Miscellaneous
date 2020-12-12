@@ -10,6 +10,10 @@ Various small programs
 
 ![Life](https://i.imgur.com/MaaN8vt.png)
 
+* Christmas Tree
+
+![Tree](https://i.imgur.com/TR7bGia.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)

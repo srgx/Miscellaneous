@@ -18,6 +18,7 @@ Various small programs
 
 * [Barnsley fern](fern.rb)
 * [Christmas tree](tree.rkt)
+* [Displacement](displacement.tcl)
 * [Equation solver](root.ndf)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)

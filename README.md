@@ -14,8 +14,13 @@ Various small programs
 
 ![Tree](https://i.imgur.com/TR7bGia.png)
 
+* Langton's ant
+
+![Ant](https://i.imgur.com/OAnjAY2.png)
+
 ## Table of Contents
 
+* [Ant](langton.tcl)
 * [Barnsley fern](fern.rb)
 * [Christmas tree](tree.rkt)
 * [Displacement](displacement.tcl)

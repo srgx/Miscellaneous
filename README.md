@@ -1,4 +1,4 @@
-# Gists
+# Misc
 
 Various small programs
 
@@ -20,13 +20,14 @@ Various small programs
 
 ## Table of Contents
 
-* [Ant](langton.tcl)
 * [Barnsley fern](fern.rb)
 * [Christmas tree](tree.rkt)
 * [Displacement](displacement.tcl)
 * [Equation solver](root.ndf)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)
+* [Langton's ant](langton.tcl)
 * [Mortgage](money.ndf)
+* [Pea](pea.tcl)
 * [Scrollbar](marker.tcl)
 * [Tarot](tarot.exs)

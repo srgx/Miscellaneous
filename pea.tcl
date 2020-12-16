@@ -1,4 +1,3 @@
-
 proc gametes {pea} {
 
   set len [llength $pea]
@@ -84,7 +83,7 @@ proc tests {} {
   lappend t [expr {[combinePea "A A" "a a"]=="{A a}"}]
   lappend t [expr {[combinePea "A a" "A a"]=="{A A} {A a} {a A} {a a}"}]
   lappend t [expr {[combinePea "A A B B" "a a b b"]=="{A B a b}"}] 
-  lappend t [expr {[combinePea "A a B b" "A a B b"]==\
+  lappend t [expr {[combinePea "A a B b" "A a B b"]==
     "{A B A B} {A B A b} {A B a B} {A B a b}\
      {A b A B} {A b A b} {A b a B} {A b a b}\
      {a B A B} {a B A b} {a B a B} {a B a b}\
@@ -144,7 +143,8 @@ set f1 []
 for {set i 0} {$i < $total} {incr i} { lappend f1 [gen $a $b] }
 
 set countA [countRed $f1]
-puts "W pierwszym pokoleniu [expr {$countA/$total*100}]% czerwonych groszków"
+puts "W pierwszym pokoleniu [format {%0.2f}\
+[expr {$countA/$total*100}]]% czerwonych groszków"
 
 # Dwa organizmy z pierwszego pokolenia
 set c [lindex $f1 0] ; # Aa
@@ -155,6 +155,7 @@ set f2 []
 for {set i 0} {$i < $total} {incr i} { lappend f2 [gen $c $d] }
 
 set countA [countRed $f2]
-puts "W drugim pokoleniu [expr {$countA/$total*100}]% czerwonych groszków"
+puts "W drugim pokoleniu [format {%0.2f}\
+[expr {$countA/$total*100}]]% czerwonych groszków"
 
 

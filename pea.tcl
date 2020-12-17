@@ -39,13 +39,10 @@ proc gametes {pea} {
 }
 
 proc combineGametes {g1 g2} {
-
-  set gsize [llength [lindex $g1 0]]
-  
-  set len [llength $g1]
   
   set cmb []
-  
+  set len [llength $g1]
+    
   for {set i 0} {$i < $len} {incr i} {
     for {set j 0} {$j < $len} {incr j} {
       lappend cmb "[lindex $g1 $i] [lindex $g2 $j]"
@@ -55,6 +52,7 @@ proc combineGametes {g1 g2} {
   return $cmb
 }
 
+# Wszystkie możliwe kombinacje z pary (a,b)
 proc combinePea {a b} {
 
   set gametesA [gametes $a]
@@ -110,26 +108,67 @@ tests
 
 # -----------------------------------------------------------------------------
 
+proc countPea {test1 test2 lst} {
+
+  set total [llength $lst]
+
+  set count 0
+  for {set i 0} {$i < $total} {incr i} {
+    set crnt [lindex $lst $i]
+    if { [$test1 $crnt] && [$test2 $crnt] } { incr count }
+  }
+  
+  return $count
+  
+}
+
+proc isYellow {a} {
+  return [expr {"A" in $a}]
+}
+
+proc isGreen {a} {
+  return [expr {![isYellow $a]}]
+}
+
+proc isPlain {a} {
+  return [expr {"B" in $a}]
+}
+
+proc isWrink {a} {
+  return [expr {![isPlain $a]}]
+}
+
 proc getR {} {
   set v [expr rand()]  
   return [expr {$v > 0.5 ? 1 : 0}]
 }
 
-proc gen {a b} {
-  set al1 [lindex $a [getR]]
-  set al2 [lindex $b [getR]]
-  return "$al1 $al2"
+
+# Nowy losowy groszek z pary (a,b)
+proc genPea {a b} {
+
+  set pairs [expr {[llength $a]/2}]
+  set newPea []
+  
+  for {set i 0} {$i < $pairs} {incr i} {
+    set fromA [lindex $a [expr {[getR]+(2*$i)}]]
+    set fromB [lindex $b [expr {[getR]+(2*$i)}]]
+    lappend newPea $fromA
+    lappend newPea $fromB
+  }
+    
+  return $newPea
 }
 
-proc countRed {a} {
-  set countA 0
-  set l [llength $a]
+proc countAinB {a b} {
+  set c 0
+  set l [llength $b]
   for {set i 0} {$i < $l} {incr i} {
-    if {"A" in [lindex $a $i]} {
-      incr countA
+    if {$a in [lindex $b $i]} {
+      incr c
     }
   }
-  return $countA
+  return $c
 }
 
 # 10 tysięcy
@@ -140,11 +179,11 @@ set b "a a"
 
 # Pierwsze pokolenie
 set f1 []
-for {set i 0} {$i < $total} {incr i} { lappend f1 [gen $a $b] }
+for {set i 0} {$i < $total} {incr i} { lappend f1 [genPea $a $b] }
 
-set countA [countRed $f1]
+set red [countAinB "A" $f1]
 puts "W pierwszym pokoleniu [format {%0.2f}\
-[expr {$countA/$total*100}]]% czerwonych groszków"
+[expr {$red/$total*100}]]% czerwonych groszków"
 
 # Dwa organizmy z pierwszego pokolenia
 set c [lindex $f1 0] ; # Aa
@@ -152,10 +191,56 @@ set d [lindex $f1 1] ; # Aa
 
 # Drugie pokolenie
 set f2 []
-for {set i 0} {$i < $total} {incr i} { lappend f2 [gen $c $d] }
+for {set i 0} {$i < $total} {incr i} { lappend f2 [genPea $c $d] }
 
-set countA [countRed $f2]
+set red [countAinB "A" $f2]
 puts "W drugim pokoleniu [format {%0.2f}\
-[expr {$countA/$total*100}]]% czerwonych groszków"
+[expr {$red/$total*100}]]% czerwonych groszków"
+
+# -----------------------------------------------------------------------------
+puts "----------------------------------------------------"
+
+
+set a "A A B B"
+set b "a a b b"
+
+#puts [genPea $a $b]
+
+# Pierwsze pokolenie
+set f1 []
+for {set i 0} {$i < $total} {incr i} { lappend f1 [genPea $a $b] }
+
+set cnt [countPea isYellow isPlain $f1]
+
+puts "W pierwszym pokoleniu [format {%0.2f}\
+[expr {$cnt/$total*100}]]% żółtych i gładkich groszków"
+
+# Dwa organizmy z pierwszego pokolenia
+set c [lindex $f1 0] ; # AaBb
+set d [lindex $f1 1] ; # AaBb
+
+# Drugie pokolenie
+set f2 []
+for {set i 0} {$i < $total} {incr i} { lappend f2 [genPea $c $d] }
+
+set cnt [countPea isYellow isPlain $f2]
+
+puts "W drugim pokoleniu [format {%0.2f}\
+[expr {$cnt/$total*100}]]% żółtych i gładkich groszków"
+
+set cnt [countPea isYellow isWrink $f2]
+
+puts "W drugim pokoleniu [format {%0.2f}\
+[expr {$cnt/$total*100}]]% żółtych i pomarszczonych groszków"
+
+set cnt [countPea isGreen isPlain $f2]
+
+puts "W drugim pokoleniu [format {%0.2f}\
+[expr {$cnt/$total*100}]]% zielonych i gładkich groszków"
+
+set cnt [countPea isGreen isWrink $f2]
+
+puts "W drugim pokoleniu [format {%0.2f}\
+[expr {$cnt/$total*100}]]% zielonych i pomarszczonych groszków"
 
 

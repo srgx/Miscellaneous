@@ -41,15 +41,33 @@ proc gametes {pea} {
 proc combineGametes {g1 g2} {
   
   set cmb []
-  set len [llength $g1]
+  set numGametes [llength $g1]
+  set gameteLen [llength [lindex $g1 0]]
     
-  for {set i 0} {$i < $len} {incr i} {
-    for {set j 0} {$j < $len} {incr j} {
-      lappend cmb "[lindex $g1 $i] [lindex $g2 $j]"
+  for {set i 0} {$i < $numGametes} {incr i} {
+    
+    # Gameta z pierwszej listy
+    set gam1 [lindex $g1 $i]
+    
+    for {set j 0} {$j < $numGametes} {incr j} {
+    
+      # Gameta z drugiej listy
+      set gam2 [lindex $g2 $j]
+      
+      # Łączenie gamet w odpowiedniej kolejności
+      # {A B} + {A B} -> {A A B B}
+      set newc []
+      for {set k 0} {$k < $gameteLen} {incr k} {
+        lappend newc [lindex $gam1 $k] [lindex $gam2 $k]
+      }
+      
+      lappend cmb $newc
+      
     }
   }
   
   return $cmb
+  
 }
 
 # Wszystkie możliwe kombinacje z pary (a,b)
@@ -80,12 +98,12 @@ proc tests {} {
   
   lappend t [expr {[combinePea "A A" "a a"]=="{A a}"}]
   lappend t [expr {[combinePea "A a" "A a"]=="{A A} {A a} {a A} {a a}"}]
-  lappend t [expr {[combinePea "A A B B" "a a b b"]=="{A B a b}"}] 
+  lappend t [expr {[combinePea "A A B B" "a a b b"]=="{A a B b}"}] 
   lappend t [expr {[combinePea "A a B b" "A a B b"]==
-    "{A B A B} {A B A b} {A B a B} {A B a b}\
-     {A b A B} {A b A b} {A b a B} {A b a b}\
-     {a B A B} {a B A b} {a B a B} {a B a b}\
-     {a b A B} {a b A b} {a b a B} {a b a b}"}]
+    "{A A B B} {A A B b} {A a B B} {A a B b}\
+     {A A b B} {A A b b} {A a b B} {A a b b}\
+     {a A B B} {a A B b} {a a B B} {a a B b}\
+     {a A b B} {a A b b} {a a b B} {a a b b}"}]
  
  
  

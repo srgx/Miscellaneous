@@ -1,20 +1,16 @@
 # Subtract vectors(arg1 - arg2)
 proc subtractVectors {arg1 arg2} {
-
-  set newX [expr {[lindex $arg1 0] - [lindex $arg2 0]}]
-  set newY [expr {[lindex $arg1 1] - [lindex $arg2 1]}]
-  
-  return "$newX $newY"
+ 
+  return "[expr {[lindex $arg1 0] - [lindex $arg2 0]}]\
+          [expr {[lindex $arg1 1] - [lindex $arg2 1]}]"
   
 }
 
 # Scale vector
-proc scaleVector {vector sc} {
-
-  set newX [expr {[lindex $vector 0] * $sc}]
-  set newY [expr {[lindex $vector 1] * $sc}]
+proc scaleVector {vector sc} { 
   
-  return "$newX $newY"
+  return "[expr {[lindex $vector 0] * $sc}]\
+          [expr {[lindex $vector 1] * $sc}]"
   
 }
 

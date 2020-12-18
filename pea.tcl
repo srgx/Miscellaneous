@@ -96,15 +96,16 @@ proc tests {} {
   
   # Krzyżówki
   
-  lappend t [expr {[combinePea "A A" "a a"]=="{A a}"}]
-  lappend t [expr {[combinePea "A a" "A a"]=="{A A} {A a} {a A} {a a}"}]
-  lappend t [expr {[combinePea "A A B B" "a a b b"]=="{A a B b}"}] 
-  lappend t [expr {[combinePea "A a B b" "A a B b"]==
-    "{A A B B} {A A B b} {A a B B} {A a B b}\
-     {A A b B} {A A b b} {A a b B} {A a b b}\
-     {a A B B} {a A B b} {a a B B} {a a B b}\
-     {a A b B} {a A b b} {a a b B} {a a b b}"}]
- 
+  lappend t\
+    [expr {[combinePea "A A" "a a"]=="{A a}"}]\
+    [expr {[combinePea "A a" "A a"]=="{A A} {A a} {a A} {a a}"}]\
+    [expr {[combinePea "A A B B" "a a b b"]=="{A a B b}"}]\
+    [expr {[combinePea "A a B b" "A a B b"]==
+      "{A A B B} {A A B b} {A a B B} {A a B b}\
+       {A A b B} {A A b b} {A a b B} {A a b b}\
+       {a A B B} {a A B b} {a a B B} {a a B b}\
+       {a A b B} {a A b b} {a a b B} {a a b b}"}]
+
  
  
   # Wyniki
@@ -122,10 +123,7 @@ proc tests {} {
 }
 
 proc getR {} {
-
-  set v [expr rand()]  
-  return [expr {$v > 0.5 ? 1 : 0}]
-  
+  return [expr {rand() > 0.5 ? 1 : 0}]
 }
 
 proc countL {test lst} {
@@ -134,8 +132,7 @@ proc countL {test lst} {
   set count 0
   
   for {set i 0} {$i < $total} {incr i} {
-    set crnt [lindex $lst $i]
-    if { [apply $test $crnt] } { incr count }
+    if { [apply $test [lindex $lst $i]] } { incr count }
   }
   
   return $count
@@ -150,10 +147,11 @@ proc genPea {a b} {
   set newPea []
   
   for {set i 0} {$i < $pairs} {incr i} {
-    set fromA [lindex $a [expr {[getR]+(2*$i)}]]
-    set fromB [lindex $b [expr {[getR]+(2*$i)}]]
-    lappend newPea $fromA
-    lappend newPea $fromB
+  
+    lappend newPea\
+      [lindex $a [expr {[getR]+(2*$i)}]]\
+      [lindex $b [expr {[getR]+(2*$i)}]]
+      
   }
     
   return $newPea

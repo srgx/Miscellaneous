@@ -14,7 +14,7 @@ Various small programs
 
 ![Tree](https://i.imgur.com/TR7bGia.png)
 
-* Langton's ant
+* Langton's Ant
 
 ![Ant](https://i.imgur.com/OAnjAY2.png)
 
@@ -22,8 +22,8 @@ Various small programs
 
 * [Barnsley fern](fern.rb)
 * [Christmas tree](tree.rkt)
-* [Displacement](displacement.tcl)
-* [Equation solver](root.ndf)
+* [Displacement vectors](displacement.tcl)
+* [Equations](root.ndf)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)
 * [Langton's ant](langton.tcl)

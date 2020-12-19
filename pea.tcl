@@ -87,11 +87,12 @@ proc tests {} {
   
   # Gamety
   
-  lappend t [expr {[gametes "A A"]=="A"}]
-  lappend t [expr {[gametes "A a"]=="A a"}]
-  lappend t [expr {[gametes "A A B B"]=="{A B}"}]
-  lappend t [expr {[gametes "a a b b"]=="{a b}"}]
-  lappend t [expr {[gametes "A a B b"]=="{A B} {A b} {a B} {a b}"}]
+  lappend t\
+    [expr {[gametes "A A"]=="A"}]\
+    [expr {[gametes "A a"]=="A a"}]\
+    [expr {[gametes "A A B B"]=="{A B}"}]\
+    [expr {[gametes "a a b b"]=="{a b}"}]\
+    [expr {[gametes "A a B b"]=="{A B} {A b} {a B} {a b}"}]
   
   
   # Krzyżówki
@@ -124,6 +125,10 @@ proc tests {} {
 
 proc getR {} {
   return [expr {rand() > 0.5 ? 1 : 0}]
+}
+
+proc perc {value total} {
+  return [expr {$value/$total*100}]
 }
 
 proc countL {test lst} {
@@ -167,12 +172,12 @@ proc flower {total} {
   # Pierwsze pokolenie
   set f1 []
   for {set i 0} {$i < $total} {incr i} { lappend f1 [genPea $a $b] }
-
-  set red [countL {{ x }
-    { return [expr {"A" in $x}] }} $f1]
     
   puts "Pokolenie 1"
-  puts "[format {%0.2f} [expr {$red/$total*100}]]% czerwonych groszków"
+  
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {"A" in $x}] }} $f1] $total]]%\
+    czerwonych groszków"
 
   # Dwa organizmy z pierwszego pokolenia
   set c [lindex $f1 0] ; # Aa
@@ -181,12 +186,12 @@ proc flower {total} {
   # Drugie pokolenie
   set f2 []
   for {set i 0} {$i < $total} {incr i} { lappend f2 [genPea $c $d] }
-
-  set red [countL {{ x }
-    { return [expr {"A" in $x}] }} $f2]
     
   puts "Pokolenie 2"
-  puts "[format {%0.2f} [expr {$red/$total*100}]]% czerwonych groszków"
+  
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {"A" in $x}] }} $f2] $total]]%\
+    czerwonych groszków"
   
 }
 
@@ -201,11 +206,11 @@ proc seed {total} {
   set f1 []
   for {set i 0} {$i < $total} {incr i} { lappend f1 [genPea $a $b] }
 
-  set cnt [countL {{ x }
-    { return [expr {"A" in $x && "B" in $x}] }} $f1]
-    
   puts "Pokolenie 1"
-  puts "[format {%0.2f} [expr {$cnt/$total*100}]]% żółtych i gładkich groszków"
+  
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {"A" in $x && "B" in $x}] }} $f1] $total]]%\
+    żółtych i gładkich groszków"
 
   # Dwa organizmy z pierwszego pokolenia
   set c [lindex $f1 0] ; # AaBb
@@ -214,27 +219,25 @@ proc seed {total} {
   # Drugie pokolenie
   set f2 []
   for {set i 0} {$i < $total} {incr i} { lappend f2 [genPea $c $d] }
-
-  set cnt [countL {{ x }
-    { return [expr {"A" in $x && "B" in $x}] }} $f2]
-    
+  
   puts "Pokolenie 2"
-  puts "[format {%0.2f} [expr {$cnt/$total*100}]]% żółtych i gładkich groszków"
+  
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {"A" in $x && "B" in $x}] }} $f2] $total]]%\
+    żółtych i gładkich groszków"
 
-  set cnt [countL {{ x }
-    { return [expr {"A" in $x && !("B" in $x)}] }} $f2]
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {"A" in $x && !("B" in $x)}] }} $f2] $total]]%\
+    żółtych i pomarszczonych groszków"
 
-  puts "[format {%0.2f} [expr {$cnt/$total*100}]]% żółtych i pomarszczonych groszków"
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {!("A" in $x) && "B" in $x}] }} $f2] $total]]%\
+    zielonych i gładkich groszków"
 
-  set cnt [countL {{ x }
-    { return [expr {!("A" in $x) && "B" in $x}] }} $f2]
-
-  puts "[format {%0.2f} [expr {$cnt/$total*100}]]% zielonych i gładkich groszków"
-
-  set cnt [countL {{ x }
-    { return [expr {!("A" in $x) && !("B" in $x)}] }} $f2]
-
-  puts "[format {%0.2f} [expr {$cnt/$total*100}]]% zielonych i pomarszczonych groszków"
+  puts "[format {%0.2f} [perc [countL {{ x }
+    { return [expr {!("A" in $x) && !("B" in $x)}] }} $f2] $total]]%\
+    zielonych i pomarszczonych groszków"
+  
   
 }
 

@@ -6,17 +6,14 @@ proc gametes {pea} {
   switch $len {
   
     2 {
-    
       for {set i 0} {$i < $len} {incr i} {
         if {!([lindex $pea $i] in $gms)} {
           lappend gms [lindex $pea $i]
         }
       }
-      
     }
     
     4 {
-    
       for {set i 0} {$i < 2} {incr i} {
         for {set j 2} {$j < $len} {incr j} {
           set cmb "[lindex $pea $i] [lindex $pea $j]"
@@ -25,11 +22,10 @@ proc gametes {pea} {
           }
         }
       }
-      
     }
     
     default {
-      
+    
     }
     
   }
@@ -76,7 +72,7 @@ proc combinePea {a b} {
   set gametesA [gametes $a]
   set gametesB [gametes $b]
   
-  return [combineGametes $gametesA $gametesB]
+  combineGametes $gametesA $gametesB
   
 }
 
@@ -128,7 +124,7 @@ proc getR {} {
 }
 
 proc perc {value total} {
-  return [expr {$value/$total*100}]
+  expr {$value/$total*100}
 }
 
 proc countL {test lst} {
@@ -154,11 +150,11 @@ proc genPea {a b} {
   for {set i 0} {$i < $pairs} {incr i} {
   
     lappend newPea\
-      [lindex $a [expr {[getR]+(2*$i)}]]\
-      [lindex $b [expr {[getR]+(2*$i)}]]
+      [lindex $a [expr {[getR]+2*$i}]]\
+      [lindex $b [expr {[getR]+2*$i}]]
       
   }
-    
+
   return $newPea
 }
 
@@ -176,7 +172,7 @@ proc flower {total} {
   puts "Pokolenie 1"
   
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {"A" in $x}] }} $f1] $total]]%\
+    { expr {"A" in $x} }} $f1] $total]]%\
     czerwonych groszków"
 
   # Dwa organizmy z pierwszego pokolenia
@@ -190,7 +186,7 @@ proc flower {total} {
   puts "Pokolenie 2"
   
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {"A" in $x}] }} $f2] $total]]%\
+    { expr {"A" in $x} }} $f2] $total]]%\
     czerwonych groszków"
   
 }
@@ -209,7 +205,7 @@ proc seed {total} {
   puts "Pokolenie 1"
   
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {"A" in $x && "B" in $x}] }} $f1] $total]]%\
+    { expr {"A" in $x && "B" in $x} }} $f1] $total]]%\
     żółtych i gładkich groszków"
 
   # Dwa organizmy z pierwszego pokolenia
@@ -223,19 +219,19 @@ proc seed {total} {
   puts "Pokolenie 2"
   
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {"A" in $x && "B" in $x}] }} $f2] $total]]%\
+    { expr {"A" in $x && "B" in $x} }} $f2] $total]]%\
     żółtych i gładkich groszków"
 
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {"A" in $x && !("B" in $x)}] }} $f2] $total]]%\
+    { expr {"A" in $x && !("B" in $x)} }} $f2] $total]]%\
     żółtych i pomarszczonych groszków"
 
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {!("A" in $x) && "B" in $x}] }} $f2] $total]]%\
+    { expr {!("A" in $x) && "B" in $x} }} $f2] $total]]%\
     zielonych i gładkich groszków"
 
   puts "[format {%0.2f} [perc [countL {{ x }
-    { return [expr {!("A" in $x) && !("B" in $x)}] }} $f2] $total]]%\
+    { expr {!("A" in $x) && !("B" in $x)} }} $f2] $total]]%\
     zielonych i pomarszczonych groszków"
   
   

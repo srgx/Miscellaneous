@@ -1,52 +1,73 @@
-#!/usr/bin/wish
 
-# Create board of zeros 20x20, red: 0, blue: 1
+
+# Main loop function
+proc every {ms body} {
+    eval $body; after $ms [namespace code [info level 0]]
+}
+
+
+# Create board of zeros, red: 0, blue: 1
+
+set numRows 80
+set numCols 100
 
 set row []
-for {set i 0} {$i < 20} {incr i} { lappend row 0 }
+for {set i 0} {$i < $numCols} {incr i} { lappend row 0 }
 set board []
-for {set i 0} {$i < 20} {incr i} { lappend board $row }
+for {set i 0} {$i < $numRows} {incr i} { lappend board $row }
 
-
-# Create 2 dimensional array of shapes
+# Create canvas
 
 canvas .can
-
-set a 0
-set b 0
-set c 10
-set d 10
-
-for {set i 0} {$i < 20} {incr i} {
-
-  for {set j 0} {$j < 20} {incr j} {
-    .can create rect $a $b $c $d -outline #f50 -fill red -tags "$i-$j"
-    
-    set a [expr {$a+10}]
-    set c [expr {$c+10}]
-  }
-  
-  set a 0
-  set c 10
-  set b [expr {$b+10}]
-  set d [expr {$d+10}]
-}
+.can configure -width 854
+.can configure -height 480
 
 pack .can
 
 wm title . "Langton"
 
-proc every {ms body} {
-    eval $body; after $ms [namespace code [info level 0]]
+
+# Create shapes with appropriate tags
+
+set squareSize 4
+
+set a 0
+set b 0
+set c $squareSize
+set d $squareSize
+
+for {set i 0} {$i < $numRows} {incr i} {
+
+  for {set j 0} {$j < $numCols} {incr j} {
+    .can create rect $a $b $c $d -outline #f50 -fill red -tags "$i-$j"
+    
+    set a [expr {$a+$squareSize}]
+    set c [expr {$c+$squareSize}]
+  }
+  
+  set a 0
+  set c $squareSize
+  set b [expr {$b+$squareSize}]
+  set d [expr {$d+$squareSize}]
 }
 
+
+# Initial state
 # direction, row, col
 # 0 - up, 1 - right, 2 - down, 3 - left
-set ant "0 10 9"
+set ant "0 25 65"
 
+# Count iterations
+set counter 0
 
 # Main loop
-every 20 {
+every 1 {
+
+  upvar counter counter
+  incr counter
+  
+  # Stop after 12200
+  if {$counter >= 12200} { return }
 
   upvar ant ant
   upvar board board
@@ -109,5 +130,6 @@ every 20 {
   }
   
 }
+
 
 

@@ -14,9 +14,13 @@ Various small programs
 
 ![Tree](https://i.imgur.com/TR7bGia.png)
 
+* Hack
+
+![Hack](https://i.imgur.com/CtLJFr7.png)
+
 * Langton's Ant
 
-![Ant](https://i.imgur.com/OAnjAY2.png)
+![Ant](https://i.imgur.com/qxY8m2j.png)
 
 ## Table of Contents
 
@@ -26,6 +30,7 @@ Various small programs
 * [Equations](root.ndf)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)
+* [Hack](hack.tcl)
 * [Langton's ant](langton.tcl)
 * [Mortgage](money.ndf)
 * [Pea](pea.tcl)

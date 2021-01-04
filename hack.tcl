@@ -3,6 +3,80 @@ proc every {ms body} {
     eval $body; after $ms [namespace code [info level 0]]
 }
 
+proc click {i j} {
+
+  upvar buffer buffer
+  upvar bufferIndex bufferIndex
+  upvar currentIndex currentIndex
+  upvar horizontal horizontal
+  upvar sequences sequences
+  upvar numSeqs numSeqs
+  upvar matrix matrix
+  
+  set ok 1
+  
+  if {$horizontal} {
+    if {$i != $currentIndex} {
+      set ok 0
+    } else {
+      set horizontal 0 ; set currentIndex $j
+    }
+  } else {
+    if {$j != $currentIndex} {
+      set ok 0
+    } else {
+      set horizontal 1 ; set currentIndex $i
+    }
+  }
+  
+  if {$ok} {
+  
+    .$i-$j configure -bg green
+  
+    set value [lindex $matrix $i $j]
+
+    puts $i-$j ; puts $value
+    
+    # Set buffer label
+    .buffer$bufferIndex configure -text $value
+    incr bufferIndex
+    
+    # Add value to buffer
+    lappend buffer $value
+    
+    puts $buffer
+    
+    
+    
+    # -------------------------------------------------------
+    
+    # Look for current value in sequences
+    for {set k 0} {$k < $numSeqs} {incr k} {
+    
+      set currentSequence [lindex $sequences $k]
+      set currentProgress [lindex $currentSequence 1]
+      
+      # Increment progress value and mark sequence cell
+      if {[lindex $currentSequence 0 $currentProgress] == $value} {
+        set newProgress [expr {$currentProgress+1}]
+      
+        lset sequences "$k 1" $newProgress
+        .seqs$k-$currentProgress configure -bg green
+         
+        puts $currentProgress
+        
+        # Check if sequence is unlocked
+        if { $newProgress == [llength [lindex $currentSequence 0]] } {
+          puts "Odblokowano"
+        }
+      }
+    }
+    
+    
+  }
+  
+}
+
 # Create canvas
 canvas .can
 .can configure -width 854
@@ -38,12 +112,19 @@ set y 50
 set hDistance 50
 set vDistance 30
 
+
+
 # Set code matrix labels
 for {set i 0} {$i < 5} {incr i} {
 
   for {set j 0} {$j < 5} {incr j} {
+  
     label .$i-$j -text [lindex $matrix $i $j] -bg red -font {Helvetica -18 bold} -width 3
     place .$i-$j -x $x -y $y
+        
+    # Bind events to matrix cells
+    bind .$i-$j <1> "click $i $j"
+    
     set x [expr {$x+$hDistance}]
   }
   
@@ -128,6 +209,7 @@ set horizontal 1
 
 # Buffer is empty
 set buffer []
+set bufferIndex 0
 
 # 1C 1C E9 55 1C
 set userInput {2 1 0 3 1}
@@ -154,69 +236,6 @@ set inputSize [llength $userInput]
 #}
 
 
-# Process user input
-set i 0
-every 1000 {
 
-  upvar i i
-  upvar matrix matrix
-  upvar horizontal horizontal
-  upvar userInput userInput
-  upvar currentInput currentInput
-  upvar buffer buffer
-  upvar currentIndex currentIndex
-  upvar sequences sequences
-  upvar inputSize inputSize
-  upvar numSeqs numSeqs
-  
-  if {$i >= $inputSize} { return }
-
-  set currentInput [lindex $userInput $i]
-  
-  # Current input specifies column
-  if {$horizontal} {
-  
-    set currentValue [lindex $matrix $currentIndex $currentInput]
-    
-    # Mark cell on code matrix, add value 
-    # to buffer and change movement axis
-    .$currentIndex-$currentInput configure -bg green
-    lappend buffer $currentValue
-    set currentIndex $currentInput
-    set horizontal 0
-    
-    
-  # Current input specifies row  
-  } else {
-  
-    set currentValue [lindex $matrix $currentInput $currentIndex]
-    
-    # Mark cell on code matrix, add value 
-    # to buffer and change movement axis
-    .$currentInput-$currentIndex configure -bg green
-    lappend buffer $currentValue
-    set currentIndex $currentInput
-    set horizontal 1
-    
-  }
-  
-  
-  # Look for current value in sequences
-  for {set j 0} {$j < $numSeqs} {incr j} {
-  
-    set currentSequence [lindex $sequences $j]
-    set currentProgress [lindex $currentSequence 1]
-    
-    # Increment progress value and mark sequence cell
-    if {[lindex $currentSequence 0 $currentProgress] == $currentValue} {
-      lset sequences "$j 1" [expr {$currentProgress+1}]
-      .seqs$j-$currentProgress configure -bg red
-    }
-  }
-  
-  # Next input
-  incr i
-
-}
 
 

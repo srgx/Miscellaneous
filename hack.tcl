@@ -5,6 +5,11 @@ proc every {ms body} {
 
 proc click {i j} {
 
+  # Cell already marked
+  if {"green" == [lindex [.$i-$j configure -bg] 4]} {
+    return
+  }
+
   upvar buffer buffer
   upvar bufferIndex bufferIndex
   upvar currentIndex currentIndex
@@ -12,6 +17,7 @@ proc click {i j} {
   upvar sequences sequences
   upvar numSeqs numSeqs
   upvar matrix matrix
+  upvar locked locked
   
   set ok 1
   
@@ -53,6 +59,9 @@ proc click {i j} {
     # Look for current value in sequences
     for {set k 0} {$k < $numSeqs} {incr k} {
     
+      # Skip finished or wrong sequences
+      if {$k in $locked} { continue }
+    
       set currentSequence [lindex $sequences $k]
       set currentProgress [lindex $currentSequence 1]
       
@@ -67,7 +76,18 @@ proc click {i j} {
         
         # Check if sequence is unlocked
         if { $newProgress == [llength [lindex $currentSequence 0]] } {
+          lappend locked $k
           puts "Odblokowano"
+        }
+        
+      # Sequence started but error occured
+      } elseif { $currentProgress > 0 } {
+      
+        lappend locked $k
+        
+        # Mark labels red
+        for {set i 0} {$i < [llength [lindex $currentSequence 0]]} {incr i} {
+          .seqs$k-$i configure -bg red
         }
       }
     }
@@ -215,6 +235,9 @@ set bufferIndex 0
 set userInput {2 1 0 3 1}
 
 set inputSize [llength $userInput]
+
+# Indices of locked sequences
+set locked []
 
 # Check progress
 # for {set i 0} {$i < 3} {incr i} {

@@ -25,12 +25,16 @@ proc click {i j} {
     if {$i != $currentIndex} {
       set ok 0
     } else {
+      .can itemconfigure vdot$i -fill yellow
+      .can itemconfigure hdot$j -fill red
       set horizontal 0 ; set currentIndex $j
     }
   } else {
     if {$j != $currentIndex} {
       set ok 0
     } else {
+      .can itemconfigure hdot$j -fill yellow
+      .can itemconfigure vdot$i -fill red
       set horizontal 1 ; set currentIndex $i
     }
   }
@@ -152,6 +156,26 @@ for {set i 0} {$i < 5} {incr i} {
   set y [expr {$y+$vDistance}]  
 }
 
+set a 40
+set b 48
+
+# Set horizontal dots
+for {set i 0} {$i < 5} {incr i} {
+  .can create oval $a 40 $b 48 -outline black -fill yellow -tag hdot$i
+  set a [expr {$a+$hDistance}]
+  set b [expr {$b+$hDistance}]
+}
+
+set a 58
+set b 66
+
+# Set vertical dots
+for {set i 0} {$i < 5} {incr i} {
+  .can create oval 17 $a 25 $b -outline black -fill yellow -tag vdot$i
+  set a [expr {$a+$vDistance}]
+  set b [expr {$b+$vDistance}]
+}
+
 
 # First buffer label coordinates
 set x 450
@@ -238,6 +262,8 @@ set inputSize [llength $userInput]
 
 # Indices of locked sequences
 set locked []
+
+.can itemconfigure vdot0 -fill red
 
 # Check progress
 # for {set i 0} {$i < 3} {incr i} {

@@ -1,6 +1,6 @@
 
 proc every {ms body} {
-    eval $body; after $ms [namespace code [info level 0]]
+  eval $body; after $ms [namespace code [info level 0]]
 }
 
 proc click {i j} {
@@ -15,15 +15,14 @@ proc click {i j} {
   upvar currentIndex currentIndex
   upvar horizontal horizontal
   upvar sequences sequences
-  upvar numSeqs numSeqs
   upvar matrix matrix
   upvar locked locked
   
-  set ok 1
+  set numSeqs [llength $sequences]
   
   if {$horizontal} {
     if {$i != $currentIndex} {
-      set ok 0
+      return
     } else {
       .can itemconfigure vdot$i -fill yellow
       .can itemconfigure hdot$j -fill red
@@ -31,7 +30,7 @@ proc click {i j} {
     }
   } else {
     if {$j != $currentIndex} {
-      set ok 0
+      return
     } else {
       .can itemconfigure hdot$j -fill yellow
       .can itemconfigure vdot$i -fill red
@@ -39,82 +38,213 @@ proc click {i j} {
     }
   }
   
-  if {$ok} {
-  
-    .$i-$j configure -bg green
-  
-    set value [lindex $matrix $i $j]
+  .$i-$j configure -bg green
 
-    puts $i-$j ; puts $value
+  set value [lindex $matrix $i $j]
+
+  puts $i-$j ; puts $value
+  
+  # Set buffer label
+  .buffer$bufferIndex configure -text $value
+  incr bufferIndex
+  
+  # Add value to buffer
+  lappend buffer $value
+  
+  puts $buffer
+  
+  # -------------------------------------------------------
+  
+  # Look for current value in sequences
+  for {set k 0} {$k < $numSeqs} {incr k} {
+  
+    # Skip finished or wrong sequences
+    if {$k in $locked} { continue }
+  
+    set currentSequence [lindex $sequences $k]
+    set currentProgress [lindex $currentSequence 1]
     
-    # Set buffer label
-    .buffer$bufferIndex configure -text $value
-    incr bufferIndex
+    # Increment progress value and mark sequence cell
+    if {[lindex $currentSequence 0 $currentProgress] == $value} {
+      set newProgress [expr {$currentProgress+1}]
     
-    # Add value to buffer
-    lappend buffer $value
-    
-    puts $buffer
-    
-    
-    
-    # -------------------------------------------------------
-    
-    # Look for current value in sequences
-    for {set k 0} {$k < $numSeqs} {incr k} {
-    
-      # Skip finished or wrong sequences
-      if {$k in $locked} { continue }
-    
-      set currentSequence [lindex $sequences $k]
-      set currentProgress [lindex $currentSequence 1]
+      lset sequences "$k 1" $newProgress
+      .seqs$k-$currentProgress configure -bg green
+       
+      puts $currentProgress
       
-      # Increment progress value and mark sequence cell
-      if {[lindex $currentSequence 0 $currentProgress] == $value} {
-        set newProgress [expr {$currentProgress+1}]
+      # Check if sequence is unlocked
+      if { $newProgress == [llength [lindex $currentSequence 0]] } {
       
-        lset sequences "$k 1" $newProgress
-        .seqs$k-$currentProgress configure -bg green
-         
-        puts $currentProgress
-        
-        # Check if sequence is unlocked
-        if { $newProgress == [llength [lindex $currentSequence 0]] } {
-          lappend locked $k
-          puts "Odblokowano"
-        }
-        
-      # Sequence started but error occured
-      } elseif { $currentProgress > 0 } {
+        puts "Odblokowano sekwencję $k"
       
         lappend locked $k
         
-        # Mark labels red
-        for {set i 0} {$i < [llength [lindex $currentSequence 0]]} {incr i} {
-          .seqs$k-$i configure -bg red
-        }
+        label .sdata$k -text [lindex $currentSequence 2]\
+        -bg yellow -font {Helvetica -20 bold} -foreground green
+        
+        place .sdata$k -x 580 -y [expr {$k*40+130}]
+    
       }
+      
+    # Sequence started but error occured
+    } elseif { $currentProgress > 0 } {
+    
+      lappend locked $k
+      
+      # Mark labels red
+      for {set i 0} {$i < [llength [lindex $currentSequence 0]]} {incr i} {
+        .seqs$k-$i configure -bg red
+      }
+      
+      label .sdata$k -text "ERROR"\
+        -bg yellow -font {Helvetica -20 bold} -foreground red
+        
+      place .sdata$k -x 580 -y [expr {$k*40+130}]
+      
     }
-    
-    
   }
   
 }
+
+proc setCodeMatrixLabels {size} {
+
+  upvar matrix matrix
+
+  set leftBorder 30
+
+  # Initial cell position in code matrix
+  set x $leftBorder
+  set y 50
+
+  # Horizontal and vertical distances
+  # between cells in code matrix
+  set hDistance 50
+  set vDistance 30
+
+  # Set code matrix labels
+  for {set i 0} {$i < $size} {incr i} {
+
+    for {set j 0} {$j < $size} {incr j} {
+    
+      label .$i-$j -text [lindex $matrix $i $j] -bg red -font {Helvetica -18 bold} -width 3
+      place .$i-$j -x $x -y $y
+          
+      # Bind events to matrix cells
+      bind .$i-$j <1> "click $i $j"
+      
+      set x [expr {$x+$hDistance}]
+    }
+    
+    set x $leftBorder
+    set y [expr {$y+$vDistance}]  
+  }
+  
+}
+
+proc setCodeDots {size} {
+
+  set hDistance 50
+  set vDistance 30
+
+  set a 40
+  set b 48
+
+  # Set horizontal dots
+  for {set i 0} {$i < $size} {incr i} {
+    .can create oval $a 40 $b 48 -outline black -fill yellow -tag hdot$i
+    set a [expr {$a+$hDistance}]
+    set b [expr {$b+$hDistance}]
+  }
+
+  set a 58
+  set b 66
+
+  # Set vertical dots
+  for {set i 0} {$i < 5} {incr i} {
+    .can create oval 17 $a 25 $b -outline black -fill yellow -tag vdot$i
+    set a [expr {$a+$vDistance}]
+    set b [expr {$b+$vDistance}]
+  }
+  
+}
+
+proc setBufferLabels {size} {
+
+  # First buffer label coordinates
+  set x 450
+  set y 45
+
+  set hDistance 35
+
+  # Set buffer labels
+  for {set i 0} {$i < $size} {incr i} {
+    label .buffer$i -text "XX" -bg black -font {Helvetica -18 bold} -foreground white
+    place .buffer$i -x $x -y $y
+    set x [expr {$x+$hDistance}]
+  }
+  
+}
+
+proc setSequenceLabels {sequences} {
+
+  set numSeqs [llength $sequences]
+  
+  set leftBorder 450
+
+  # Initial sequence cell position
+  set x $leftBorder
+  set y 130
+
+  set hDistance 40
+  set vDistance 40
+
+  # Set sequence labels
+  for {set i 0} {$i < $numSeqs} {incr i} {
+
+    set seqs [lindex $sequences $i 0]
+    set lng [llength $seqs]
+    
+    for {set j 0} {$j < $lng} {incr j} {
+    
+      label .seqs$i-$j -text [lindex $seqs $j]\
+      -bg black -font {Helvetica -18 bold}\
+      -width 3 -foreground red
+      
+      place .seqs$i-$j -x $x -y $y
+      
+      set x [expr {$x+$hDistance}]
+      
+    }
+    
+    set x $leftBorder
+    set y [expr {$y+$vDistance}]
+    
+  }
+}
+
+# ------------------------------------------------------------------------
 
 # Create canvas
 canvas .can
 .can configure -width 854
 .can configure -height 480
+place .can -x 0 -y 0
 
 # Create yellow background
-.can create rect 0 0 854 480 \
-    -outline #f50 -fill yellow
-
+.can create rect 0 0 854 480 -outline #f50 -fill yellow
+    
 # Main labels
 label .matrix -text "CODE MATRIX" -bg yellow -font {Helvetica -22 bold}
-label .buffer -text "BUFFER" -bg yellow -font {Helvetica -22 bold}
-label .sequences -text "SEQUENCE" -bg yellow -font {Helvetica -22 bold}
+place .matrix -x 30 -y 10
 
+label .buffer -text "BUFFER" -bg yellow -font {Helvetica -22 bold}
+place .buffer -x 500 -y 10
+
+label .sequences -text "SEQUENCE" -bg yellow -font {Helvetica -22 bold}
+place .sequences -x 500 -y 90
+
+# ------------------------------------------------------------------------
 
 # Code matrix
 set matrix\
@@ -124,125 +254,26 @@ set matrix\
    {55 1C 55 55 1C}\
    {E9 1C 1C 1C 55}}
 
-
-set leftBorder 30
-
-# Initial cell position in code matrix
-set x $leftBorder
-set y 50
-
-# Horizontal and vertical distances
-# between cells in code matrix
-set hDistance 50
-set vDistance 30
-
-
-
-# Set code matrix labels
-for {set i 0} {$i < 5} {incr i} {
-
-  for {set j 0} {$j < 5} {incr j} {
-  
-    label .$i-$j -text [lindex $matrix $i $j] -bg red -font {Helvetica -18 bold} -width 3
-    place .$i-$j -x $x -y $y
-        
-    # Bind events to matrix cells
-    bind .$i-$j <1> "click $i $j"
-    
-    set x [expr {$x+$hDistance}]
-  }
-  
-  set x $leftBorder
-  set y [expr {$y+$vDistance}]  
-}
-
-set a 40
-set b 48
-
-# Set horizontal dots
-for {set i 0} {$i < 5} {incr i} {
-  .can create oval $a 40 $b 48 -outline black -fill yellow -tag hdot$i
-  set a [expr {$a+$hDistance}]
-  set b [expr {$b+$hDistance}]
-}
-
-set a 58
-set b 66
-
-# Set vertical dots
-for {set i 0} {$i < 5} {incr i} {
-  .can create oval 17 $a 25 $b -outline black -fill yellow -tag vdot$i
-  set a [expr {$a+$vDistance}]
-  set b [expr {$b+$vDistance}]
-}
-
-
-# First buffer label coordinates
-set x 450
-set y 45
-
-set hDistance 35
-
-# Set buffer labels
-for {set i 0} {$i < 7} {incr i} {
-  label .buffer$i -text "XX" -bg black -font {Helvetica -18 bold} -foreground white
-  place .buffer$i -x $x -y $y
-  set x [expr {$x+$hDistance}]
-}
-
-
 # List of sequences(sequence, progress, description)
 set sequences\
   {{{55 1C} 0 DATAMINE_V1}\
    {{1C 1C E9} 0 DATAMINE_V2}\
    {{BD E9 55} 0 DATAMINE_V3}}
+   
+# ------------------------------------------------------------------------
 
+setCodeMatrixLabels 5
+setCodeDots 5
+setBufferLabels 7
+setSequenceLabels $sequences
 
-set numSeqs [llength $sequences]
-
-set leftBorder 450
-
-# Initial sequence cell position
-set x $leftBorder
-set y 130
-
-set hDistance 40
-set vDistance 40
-
-# Set sequence labels
-for {set i 0} {$i < $numSeqs} {incr i} {
-
-  set seqs [lindex $sequences $i 0]
-  set lng [llength $seqs]
-  
-  for {set j 0} {$j < $lng} {incr j} {
-  
-    label .seqs$i-$j -text [lindex $seqs $j]\
-    -bg black -font {Helvetica -18 bold}\
-    -width 3 -foreground red
-    
-    place .seqs$i-$j -x $x -y $y
-    
-    set x [expr {$x+$hDistance}]
-    
-  }
-  
-  set x $leftBorder
-  set y [expr {$y+$vDistance}]
-  
-}
-
-# Set 3 main labels and background
-place .matrix -x 30 -y 10
-place .buffer -x 500 -y 10
-place .sequences -x 500 -y 90
-place .can -x 0 -y 0
+# ------------------------------------------------------------------------
 
 # Set window title and geometry
 wm title . "Hack"
 wm geometry . 854x480+0+0
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 # Initial Row/Col index
 set currentIndex 0
@@ -255,36 +286,13 @@ set horizontal 1
 set buffer []
 set bufferIndex 0
 
-# 1C 1C E9 55 1C
-set userInput {2 1 0 3 1}
-
-set inputSize [llength $userInput]
-
 # Indices of locked sequences
 set locked []
 
+# Mark first row
 .can itemconfigure vdot0 -fill red
 
-# Check progress
-# for {set i 0} {$i < 3} {incr i} {
-#
-#  set currentSequence [lindex $sequences $i]
-#  
-#  set progress [lindex $currentSequence 1]
-#  set seql [llength [lindex $currentSequence 0]]
-#  set bonus [lindex $currentSequence 2]
-#  
-#  if { $progress == $seql } {
-#    puts -nonewline "Unlocked - "
-#  } else {
-#    puts -nonewline "Failed - "
-#  }
-#  
-#  puts $bonus
-#  
-#}
-
-
+# ------------------------------------------------------------------------
 
 
 

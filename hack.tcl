@@ -5,19 +5,22 @@ proc every {ms body} {
 
 proc click {i j} {
 
-  # Cell already marked
-  if {"green" == [lindex [.$i-$j configure -bg] 4]} {
+  upvar bufferSize bufferSize
+  upvar bufferIndex bufferIndex
+
+  # Full buffer or cell already marked
+  if {$bufferIndex >= $bufferSize ||
+     "green" == [lindex [.$i-$j configure -bg] 4]} {
     return
   }
-
+    
   upvar buffer buffer
-  upvar bufferIndex bufferIndex
   upvar currentIndex currentIndex
   upvar horizontal horizontal
   upvar sequences sequences
   upvar matrix matrix
   upvar locked locked
-  
+
   set numSeqs [llength $sequences]
   
   if {$horizontal} {
@@ -41,8 +44,6 @@ proc click {i j} {
   .$i-$j configure -bg green
 
   set value [lindex $matrix $i $j]
-
-  puts $i-$j ; puts $value
   
   # Set buffer label
   .buffer$bufferIndex configure -text $value
@@ -50,10 +51,6 @@ proc click {i j} {
   
   # Add value to buffer
   lappend buffer $value
-  
-  puts $buffer
-  
-  # -------------------------------------------------------
   
   # Look for current value in sequences
   for {set k 0} {$k < $numSeqs} {incr k} {
@@ -70,13 +67,11 @@ proc click {i j} {
     
       lset sequences "$k 1" $newProgress
       .seqs$k-$currentProgress configure -bg green
-       
-      puts $currentProgress
       
       # Check if sequence is unlocked
       if { $newProgress == [llength [lindex $currentSequence 0]] } {
       
-        puts "Odblokowano sekwencję $k"
+        # Data mine unlocked
       
         lappend locked $k
         
@@ -161,7 +156,7 @@ proc setCodeDots {size} {
   set b 66
 
   # Set vertical dots
-  for {set i 0} {$i < 5} {incr i} {
+  for {set i 0} {$i < $size} {incr i} {
     .can create oval 17 $a 25 $b -outline black -fill yellow -tag vdot$i
     set a [expr {$a+$vDistance}]
     set b [expr {$b+$vDistance}]
@@ -260,11 +255,13 @@ set sequences\
    {{1C 1C E9} 0 DATAMINE_V2}\
    {{BD E9 55} 0 DATAMINE_V3}}
    
+set bufferSize 7
+   
 # ------------------------------------------------------------------------
 
 setCodeMatrixLabels 5
 setCodeDots 5
-setBufferLabels 7
+setBufferLabels $bufferSize
 setSequenceLabels $sequences
 
 # ------------------------------------------------------------------------

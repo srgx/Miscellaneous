@@ -22,10 +22,15 @@ Various small programs
 
 ![Ant](https://i.imgur.com/qxY8m2j.png)
 
+* Cannonball
+
+![Cannonball](https://i.imgur.com/ZyiJEfa.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)
 * [Breach protocol](breach.tcl)
+* [Cannonball](cannon.tcl)
 * [Christmas tree](tree.rkt)
 * [Displacement vectors](displacement.tcl)
 * [Equations](root.ndf)

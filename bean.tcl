@@ -71,7 +71,7 @@ createBalls 8 7 2 2
 # -------------------------------------------------------------
 
 pack .can
-wm title . "Galton"
+wm title . "Bean Machine"
 
 # Initial ball position
 set position {0 0}

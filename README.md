@@ -30,6 +30,10 @@ Various small programs
 
 ![Bean](https://i.imgur.com/sBXk9PA.png)
 
+* Lightning
+
+![Light](https://i.imgur.com/gI39cRa.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)
@@ -42,6 +46,7 @@ Various small programs
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)
 * [Langton's ant](langton.tcl)
+* [Lightning](lightning.tcl)
 * [Mortgage](money.ndf)
 * [Pea](pea.tcl)
 * [Scrollbar](marker.tcl)

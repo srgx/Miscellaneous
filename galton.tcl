@@ -10,72 +10,76 @@ proc rnd {} {
   }
 }
 
+# Create canvas
 canvas .can
 .can configure -width 854
 .can configure -height 480
-
-set diameter 10
-set hDistance 12
-set vDistance 12
-set shift [expr {$hDistance/2}]
 
 # Initial ball position
 set rowX 200
 set rowY 10
 
-set rws 8
-set rows [expr {$rws+1}]
-
 set targets {}
 
-for {set i 0} {$i < $rows} {incr i} {
+proc createBalls {rws dmtr hd vd} {
 
-  set balls [expr {$i+1}]
-  set currentX $rowX
+  global rows rowX rowY diameter hDistance vDistance shift targets
   
-  for {set j 0} {$j < $balls} {incr j} {
-  
-    # Create one ball
-    if {$i!=$rows-1} {
-      .can create oval\
-        $currentX $rowY\
-        [expr {$currentX+$diameter}]\
-        [expr {$rowY+$diameter}]\
-        -outline black -fill black -tag $i-$j
+  set rows [expr {$rws+1}]
+  set diameter $dmtr
+  set hDistance $hd
+  set vDistance $vd
+  set shift [expr {$diameter/2+$hDistance/2}]
+
+  for {set i 0} {$i < $rows} {incr i} {
+
+    set balls [expr {$i+1}]
+    set currentX $rowX
+    
+    for {set j 0} {$j < $balls} {incr j} {
+    
+      # Create one ball
+      if {$i!=$rows-1} {
+        .can create oval\
+          $currentX $rowY\
+          [expr {$currentX+$diameter}]\
+          [expr {$rowY+$diameter}]\
+          -outline black -fill black -tag $i-$j
+        
+      # In last row set list of target positions
+      } else {
+        lappend targets "$currentX $rowY"
+      }
+    
+      # Move right
+      set currentX [expr {$currentX+$diameter+$hDistance}]
       
-    # In last row set list of target positions
-    } else {
-      lappend targets "$currentX $rowY"
     }
-  
-    # Move right
-    set currentX [expr {$currentX+$hDistance}]
+    
+    # Move initial x position to the left
+    set rowX [expr {$rowX-$shift}]
+    
+    # Move y position down
+    set rowY [expr {$rowY+$diameter+$vDistance}]
     
   }
-  
-  # Move initial x position to the left
-  set rowX [expr {$rowX-$shift}]
-  
-  # Move y position down
-  set rowY [expr {$rowY+$vDistance}]
-    
 }
+
+# -------------------------------------------------------------
+# Balls, Diameter, Horizontal distance, Vertical distance
+createBalls 8 7 2 2
+# -------------------------------------------------------------
 
 pack .can
 wm title . "Galton"
-
 
 # Initial ball position
 set position {0 0}
 .can itemconfigure 0-0 -fill red
 
-every 100 {
+every 50 {
 
-  upvar position position
-  upvar rows rows
-  upvar targets targets
-  upvar diameter diameter
-  upvar vDistance vDistance
+  global position rows targets diameter vDistance
   
   set row [lindex $position 0]
   set col [lindex $position 1]
@@ -114,7 +118,7 @@ every 100 {
       -outline black -fill red
     
     # Set new target position in column where ball was added
-    lset targets $finalColumn 1 [expr {$y+$vDistance}]
+    lset targets $finalColumn 1 [expr {$y+$diameter/3}]
     
     # Start from top  
     set position {0 0}

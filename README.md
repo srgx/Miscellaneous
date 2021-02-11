@@ -26,6 +26,10 @@ Various small programs
 
 ![Cannonball](https://i.imgur.com/ZyiJEfa.png)
 
+* Galton Box
+
+![Galton](https://i.imgur.com/sBXk9PA.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)
@@ -34,6 +38,7 @@ Various small programs
 * [Christmas tree](tree.rkt)
 * [Displacement vectors](displacement.tcl)
 * [Equations](root.ndf)
+* [Galton box](galton.tcl)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)
 * [Langton's ant](langton.tcl)

@@ -34,6 +34,10 @@ Various small programs
 
 ![Light](https://i.imgur.com/gI39cRa.png)
 
+* DLA
+
+![DLA](https://i.imgur.com/JOhwYBf.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)
@@ -42,6 +46,7 @@ Various small programs
 * [Cannonball](cannon.tcl)
 * [Christmas tree](tree.rkt)
 * [Displacement vectors](displacement.tcl)
+* [Diffusion-limited aggregation](dla.tcl)
 * [Equations](root.ndf)
 * [Game of life v1](game.rb)
 * [Game of life v2](life.ndf)

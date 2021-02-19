@@ -15,15 +15,16 @@ canvas .can
 .can configure -width 854
 .can configure -height 480
 
-# Initial ball position
-set rowX 200
-set rowY 10
-
+# List of points
 set targets {}
 
 proc createBalls {rws dmtr hd vd} {
 
-  global rows rowX rowY diameter hDistance vDistance shift targets
+  global rows diameter targets
+  
+  # Initial ball position
+  set rowX 200
+  set rowY 10
   
   set rows [expr {$rws+1}]
   set diameter $dmtr
@@ -79,7 +80,7 @@ set position {0 0}
 
 every 50 {
 
-  global position rows targets diameter vDistance
+  global position rows targets diameter
   
   set row [lindex $position 0]
   set col [lindex $position 1]

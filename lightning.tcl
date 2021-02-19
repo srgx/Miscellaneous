@@ -18,19 +18,20 @@ canvas .can
 .can create rect 0 0 400 300 \
     -outline black -fill black
 
-# Initial point position
-set rowX 200
-set rowY 10
-
+# List of points
+# Point is {x y}
 set listRows {}
 
 proc createPoints {rws hd vd} {
 
-  global rows rowX rowY hDistance vDistance listRows
-  
+  # Initial point position
+  set rowX 200
+  set rowY 10
+
+  global rows listRows
+    
   set rows [expr {$rws+1}]
-  set hDistance $hd
-  set vDistance $vd
+  set hDistance $hd ; set vDistance $vd
   set shift [expr {$hDistance/2}]
 
   for {set i 0} {$i < $rows} {incr i} {
@@ -82,7 +83,7 @@ every 8 {
     incr pause -1
   } else {
   
-    global position rows vDistance listRows c
+    global position rows listRows c
   
     set row [lindex $position 0]
     set col [lindex $position 1]

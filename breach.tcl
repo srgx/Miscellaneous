@@ -142,8 +142,8 @@ proc setCodeDots {size} {
   set hDistance 50
   set vDistance 30
 
-  set a 40
-  set b 48
+  set a 42
+  set b [expr {$a+8}]
 
   # Set horizontal dots
   for {set i 0} {$i < $size} {incr i} {
@@ -152,12 +152,12 @@ proc setCodeDots {size} {
     set b [expr {$b+$hDistance}]
   }
 
-  set a 58
-  set b 66
+  set a 59
+  set b [expr {$a+8}]
 
   # Set vertical dots
   for {set i 0} {$i < $size} {incr i} {
-    .can create oval 17 $a 25 $b -outline black -fill yellow -tag vdot$i
+    .can create oval 19 $a 27 $b -outline black -fill yellow -tag vdot$i
     set a [expr {$a+$vDistance}]
     set b [expr {$b+$vDistance}]
   }

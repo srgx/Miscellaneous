@@ -4,12 +4,51 @@ proc every {ms body} {
   eval $body; after $ms [namespace code [info level 0]]
 }
 
-# Stan(1 - Jedzenie, 0 - Myślenie)
-# {Imię, Pozostały czas, Stan}
 
-proc rnd {min max} {
-  expr {int(rand()*($max+1-$min))+$min}
+proc drawShapes {numShapes currentAngle distanceFromCenter radius color} {
+
+  global middleX middleY radiansBetweenShapes
+  
+  set points {}
+
+  for {set i 0} {$i < $numShapes} {incr i} {
+
+    set vecX [expr {cos($currentAngle)}] ; set vecY [expr {sin($currentAngle)}]
+    
+    set pointX\
+      [expr {$middleX+$vecX*$distanceFromCenter}]
+      
+    set pointY\
+      [expr {$middleY-$vecY*$distanceFromCenter}]
+    
+    lappend points "$pointX $pointY"
+
+    set newX\
+      [expr {$pointX-$radius}]
+      
+    set newY\
+      [expr {$pointY-$radius}]
+    
+    
+    set shapeDiameter [expr {$radius*2}]
+    
+    .can create oval\
+      $newX $newY\
+      [expr {$newX+$shapeDiameter}]\
+      [expr {$newY+$shapeDiameter}]\
+      -outline $color -fill $color
+      
+    set currentAngle [expr {$currentAngle+$radiansBetweenShapes}]
+  
+  }
+  
+  return $points
+  
 }
+
+# Funkcje losujące
+proc rnd {min max} { expr {int(rand()*($max+1-$min))+$min} }
+proc getRandom {} { return [rnd 5 20] }
 
 canvas .can
 .can configure -width 854
@@ -18,144 +57,107 @@ canvas .can
 # -----------------------------------------------
 
 # Liczba filozofów i widelców
-set numPhi 5 ; set numFork $numPhi
+set numPhi 5
 
 # Stół
-set diameter 190
-set radius [expr {$diameter/2}]
+set tableRadius 95
 
-# Wymiary filozofa
-set phiDiam 54
-set phiRad [expr {$phiDiam/2}]
+# Promień filozofa
+set phiRad 27
 
-# Wymiary widelca
-set forkDiam 20
-set forkRad [expr {$forkDiam/2}]
-
-# -----------------------------------------------
-
-# Lewa góra i prawy dół stołu
-set x1 150 ; set y1 70
-set x2 [expr {$x1+$diameter}]
-set y2 [expr {$y1+$diameter}]
-
-# Środek stołu
-set middleX [expr {$x1+$radius}]
-set middleY [expr {$y1+$radius}]
+# Promień widelca
+set forkRad 10
 
 set angle [expr {360/$numPhi}]
-set radians [expr {$angle*0.0174532925}]
+set radiansBetweenShapes [expr {$angle*0.0174532925}]
 
-# Stół
-.can create oval\
-  $x1 $y1 $x2 $y2\
-  -outline red -fill green
-  
-# Środek
-.can create oval\
-  $middleX $middleY $middleX $middleY\
-  -outline red -fill red
-  
-# Pozycja filozofów
-set distanceFromCenter 130
-
-set currentAngle $radians
-
-set philoPoints {}
-set forkPoints {}
-
-# Narysuj filozofów
-for {set i 0} {$i < $numPhi} {incr i} {
-
-  set vecX [expr {cos($currentAngle)}]
-  set vecY [expr {sin($currentAngle)}]
-  
-  set pointX [expr {$middleX+$vecX*$distanceFromCenter}]
-  set pointY [expr {$middleY-$vecY*$distanceFromCenter}]
-  
-  lappend philoPoints "$pointX $pointY"
-
-  set newX\
-    [expr {$pointX-$phiRad}]
-    
-  set newY\
-    [expr {$pointY-$phiRad}]
-  
-  .can create oval\
-    $newX $newY\
-    [expr {$newX+$phiDiam}]\
-    [expr {$newY+$phiDiam}]\
-    -outline blue -fill blue
-    
-  set currentAngle [expr {$currentAngle+$radians}]
-  
-}
-
-
-# Pozycja widelców
-set distanceFromCenter 70
-
-set currentAngle [expr {$radians/2}]
-
-# Narysuj widelce
-for {set i 0} {$i < $numFork} {incr i} {
-
-  set vecX [expr {cos($currentAngle)}]
-  set vecY [expr {sin($currentAngle)}]
-  
-  set pointX [expr {$middleX+$vecX*$distanceFromCenter}]
-  set pointY [expr {$middleY-$vecY*$distanceFromCenter}]
-  
-  lappend forkPoints "$pointX $pointY"
-
-  set newX\
-    [expr {$pointX-$forkRad}]
-    
-  set newY\
-    [expr {$pointY-$forkRad}]
-  
-  .can create oval\
-    $newX $newY\
-    [expr {$newX+$forkDiam}]\
-    [expr {$newY+$forkDiam}]\
-    -outline red -fill red
-    
-  set currentAngle [expr {$currentAngle+$radians}]
-  
-}
-
-
-pack .can
-wm title . "Dinner"
-
-set minTime 5
-set maxTime 20
-
+# Stan(1 - Jedzenie, 0 - Myślenie)
+# {Imię, Pozostały czas, Stan}
 set e "
 
-  {Arystoteles [rnd $minTime $maxTime] 0}
+  {Arystoteles [getRandom] 0}
   0
-  {Platon [rnd $minTime $maxTime] 0}
+  {Platon [getRandom] 0}
   0
-  {Kartezjusz [rnd $minTime $maxTime] 0}
+  {Kartezjusz [getRandom] 0}
   0
-  {Sokrates [rnd $minTime $maxTime] 0}
+  {Sokrates [getRandom] 0}
   0
-  {Augustyn [rnd $minTime $maxTime] 0}
+  {Augustyn [getRandom] 0}
   0
   
 "
 
-set rounds 200
-set limit [expr {[llength $e]-1}]
+set lastPhilosopherIndex [expr {[llength $e]-2}]
+
+# -----------------------------------------------
+
+proc drawTable {} {
+
+  global tableRadius numPhi middleX middleY
+
+  # Lewa góra i prawy dół stołu
+  set x1 150 ; set y1 70
+  set tableDiameter [expr {$tableRadius*2}]
+  set x2 [expr {$x1+$tableDiameter}]
+  set y2 [expr {$y1+$tableDiameter}]
+
+  # Środek stołu
+  set middleX [expr {$x1+$tableRadius}]
+  set middleY [expr {$y1+$tableRadius}]
+
+  # Stół
+  .can create oval\
+    $x1 $y1 $x2 $y2\
+    -outline red -fill green
+    
+  # Środek
+  .can create oval\
+    $middleX $middleY $middleX $middleY\
+    -outline red -fill red
+    
+}
+
+
+proc drawCircles {numPhi} {
+
+  global radiansBetweenShapes phiRad forkRad philoPoints forkPoints
+
+  # Stół
+  drawTable
+
+  set philosophersFromCenter 130
+  set initialAngle $radiansBetweenShapes
+
+  # Filozofowie
+  set philoPoints\
+    [drawShapes $numPhi $initialAngle\
+    $philosophersFromCenter $phiRad blue]
+
+  set forksFromCenter 70
+  set initialAngle [expr {$radiansBetweenShapes/2}]
+
+  # Widelce
+  set forkPoints\
+    [drawShapes $numPhi $initialAngle\
+    $forksFromCenter $forkRad red]
+}
+
+
+# Narysuj wszyskie kształty
+drawCircles $numPhi
+
+pack .can
+wm title . "Dinner"
 
 
 every 25 {
 
-  global limit e forkPoints philoPoints minTime maxTime
+  global lastPhilosopherIndex e forkPoints philoPoints
 
-  for {set j 0} {$j < $limit} {incr j 2} {
+  for {set j 0} {$j <= $lastPhilosopherIndex} {incr j 2} {
   
+    # Pobierz dane o filozofie
     set philo [lindex $e $j]
     set name [lindex $philo 0]
     set remTime [lindex $philo 1]
@@ -215,7 +217,7 @@ every 25 {
         lset e $j 2 0
         
         # Losowy czas myślenia
-        lset e $j 1 [rnd $minTime $maxTime]
+        lset e $j 1 [getRandom]
         
         # Odkładanie widelców
         lset e $leftForkIndex 0
@@ -273,7 +275,7 @@ every 25 {
               lset e $j 2 1
               
               # Ustawienie czasu jedzenia
-              lset e $j 1 [rnd $minTime $maxTime]
+              lset e $j 1 [getRandom]
               
               set startActivity 1
             
@@ -317,9 +319,6 @@ every 25 {
   }
   
   puts "-------------------------------------------------"
+  
 }
-
-
-
-
 

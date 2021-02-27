@@ -1,26 +1,20 @@
 
-###############################################################
-#      Dining Philosophers - Procedures & Functions          ;#
-###############################################################
+# Dining Philosophers - Procedures & Functions
 
-
-############################
-#    Small Functions      ;#
-############################
+# Loop and line
 proc every {ms body} {
   eval $body; after $ms [namespace code [info level 0]]
 }
 proc line {} {
   puts "-------------------------------------------------"
 }
+
 # Random functions
 proc rnd {min max} { expr {int(rand()*($max+1-$min))+$min} }
 proc getRandom {} { return [rnd 5 20] }
 
 
-######################################
-#    Draw Philosophers & Forks      ;#
-######################################
+# Draw Philosophers & Forks
 proc drawShapes {numShapes currentAngle distanceFromCenter radius color} {
 
   global middleX middleY radiansBetweenShapes ; set points {}
@@ -64,9 +58,7 @@ proc drawShapes {numShapes currentAngle distanceFromCenter radius color} {
   
 }
 
-##############################
-#    Draw large circle      ;#
-##############################
+# Draw large circle
 proc drawTable {} {
 
   global tableRadius numPhi middleX middleY
@@ -84,7 +76,7 @@ proc drawTable {} {
   # Draw table
   .can create oval\
     $x1 $y1 $x2 $y2\
-    -outline red -fill green
+    -outline red -fill purple
     
   # Draw middle dot
   .can create oval\
@@ -93,9 +85,7 @@ proc drawTable {} {
     
 }
 
-############################
-#    Draw all shapes      ;#
-############################
+# Draw all shapes
 proc drawCircles {numPhi} {
 
   global radiansBetweenShapes phiRad forkRad philoPoints forkPoints
@@ -109,7 +99,7 @@ proc drawCircles {numPhi} {
   # Philosophers
   set philoPoints\
     [drawShapes $numPhi $initialAngle\
-    $philosophersFromCenter $phiRad blue]
+    $philosophersFromCenter $phiRad black]
 
   set forksFromCenter 70
   set initialAngle [expr {$radiansBetweenShapes/2}]
@@ -117,13 +107,11 @@ proc drawCircles {numPhi} {
   # Forks
   set forkPoints\
     [drawShapes $numPhi $initialAngle\
-    $forksFromCenter $forkRad red]
+    $forksFromCenter $forkRad yellow]
     
 }
 
-########################
-#    Draw one fork    ;#
-########################
+# Draw one fork
 proc drawFork {index direction} {
 
   global forkPoints philoPoints
@@ -157,9 +145,7 @@ proc drawFork {index direction} {
   
 }
 
-############################
-#    Eating philosopher   ;#
-############################
+# Eating philosopher
 proc processEating {index} {
 
   global e
@@ -192,9 +178,7 @@ proc processEating {index} {
 }
 
 
-################################
-#    Non-eating philosopher   ;#
-################################
+# Non-eating philosopher
 proc processNonEating {index} {
 
   global e
@@ -259,9 +243,7 @@ proc processNonEating {index} {
 }
 
 
-###################
-#   Neighbours   ;#
-###################
+# Neighbours
 proc getNeighbourIndices {index} {
 
   global e
@@ -282,19 +264,16 @@ proc getNeighbourIndices {index} {
 }
 
 
-###########################
-#    Delete both forks   ;#
-###########################
+# Delete both forks
 proc deleteForks {index} {  
   set pIndex [expr {$index/2}]
     .can delete $pIndex-0
     .can delete $pIndex-1
 }
 
+# ---------------------------------------------------------
 
-###############################################################
-#               Philosophers & Forks Data                    ;#
-###############################################################
+# Philosophers & Forks Data
 
 # { Name, Remaining time, State }
 # State ( 1 - Eating, 0 - Thinking )
@@ -313,84 +292,71 @@ set e "
   
 "
 
-###############################################################
-#               Initialize Variables & Shapes                ;#
-###############################################################
-                                                             ;#
-# Number of philosophers and forks                           ;#
-set numPhi 5                                                 ;#
-                                                             ;#
-# Table, philosopher, fork radii                             ;#
-set tableRadius 95 ; set phiRad 27 ; set forkRad 10          ;#
-                                                             ;#
-# Angle between philosophers and forks                       ;#
-set angle [expr {360/$numPhi}]                               ;#
-set radiansBetweenShapes [expr {$angle*0.0174532925}]        ;#
-                                                             ;#
-set lastPhilosopherIndex [expr {[llength $e]-2}]             ;#
-                                                             ;#
-# Create canvas                                              ;#
-canvas .can                                                  ;#
-.can configure -width 854                                    ;#
-.can configure -height 480                                   ;#
-                                                             ;#
-# Draw all shapes                                            ;#
-drawCircles $numPhi                                          ;#
-                                                             ;#
-pack .can                                                    ;#
-wm title . "Dinner"                                          ;#
-                                                             ;#
-###############################################################
+# Initialize Variables & Shapes
+
+# Number of philosophers and forks
+set numPhi 5
+
+# Table, philosopher, fork radii
+set tableRadius 95 ; set phiRad 27 ; set forkRad 10
+
+# Angle between philosophers and forks
+set angle [expr {360/$numPhi}]
+set radiansBetweenShapes [expr {$angle*0.0174532925}]
+
+set lastPhilosopherIndex [expr {[llength $e]-2}]
+
+# Create canvas
+canvas .can
+.can configure -width 854
+.can configure -height 480
 
 
+# Draw all shapes
+drawCircles $numPhi
 
-####################################################################
-#                    Main Program Loop                            ;#
-####################################################################
-every 25 {                                                        ;#
-                                                                  ;#
-  global lastPhilosopherIndex e forkPoints philoPoints            ;#
-                                                                  ;#
-  for {set j 0} {$j <= $lastPhilosopherIndex} {incr j 2} {        ;#
-                                                                  ;#
-    # Philosopher data                                            ;#
-    set philo [lindex $e $j]                                      ;#
-    set name [lindex $philo 0]                                    ;#
-    set remTime [lindex $philo 1]                                 ;#
-    set activity [lindex $philo 2]                                ;#
-                                                                  ;#
-    # Fork indices                                                ;#
-    set rForkIndex [expr {$j+1}]                                  ;#
-    set lForkIndex [expr {0==$j ? 9 : $j-1}]                      ;#
-                                                                  ;#
-    set neIndices [getNeighbourIndices $j]                        ;#
-    set leftNeIndex [lindex $neIndices 0]                         ;#
-    set rightNeIndex [lindex $neIndices 1]                        ;#
-                                                                  ;#
-    set startActivity 0                                           ;#
-                                                                  ;#
-    # Philosopher is eating                                       ;#
-    if {1==$activity} {                                           ;#
-                                                                  ;#
-      processEating $j                                            ;#
-                                                                  ;#
-    # Philosopher is not eating                                   ;#
-    } else {                                                      ;#
-                                                                  ;#
-      processNonEating $j                                         ;#
-                                                                  ;#
-    }                                                             ;#
-                                                                  ;#
-    # Dont decrement if remaining time                            ;#
-    # is 0 or activity just started                               ;#
-    if {!$startActivity&&$remTime > 0} {                          ;#
-      lset e $j 1 [expr {$remTime-1}]                             ;#
-    }                                                             ;#
-                                                                  ;#
-  }                                                               ;#
-                                                                  ;#
-  line                                                            ;#
-                                                                  ;#
-}                                                                 ;#
-                                                                  ;#
-####################################################################                                                                
+pack .can
+wm title . "Dinner"
+
+# ---------------------------------------------------------
+
+# Main loop
+every 25 {
+
+  global lastPhilosopherIndex e forkPoints philoPoints
+  
+  for {set j 0} {$j <= $lastPhilosopherIndex} {incr j 2} {
+  
+    # Philosopher data
+    set philo [lindex $e $j]
+    set name [lindex $philo 0]
+    set remTime [lindex $philo 1]
+    set activity [lindex $philo 2]
+    
+    # Fork indices
+    set rForkIndex [expr {$j+1}]
+    set lForkIndex [expr {0==$j ? 9 : $j-1}]
+  
+    set neIndices [getNeighbourIndices $j]
+    set leftNeIndex [lindex $neIndices 0]
+    set rightNeIndex [lindex $neIndices 1]
+    
+    set startActivity 0
+    # Philosopher is eating
+    if {1==$activity} {
+      processEating $j
+    # Philosopher is not eating
+    } else {
+      processNonEating $j
+    }
+    # Dont decrement if remaining time
+    # is 0 or activity just started
+    if {!$startActivity&&$remTime > 0} {
+      lset e $j 1 [expr {$remTime-1}]
+    }
+    
+  }
+  
+  line
+  
+}                                                                

@@ -38,6 +38,10 @@ Various small programs
 
 ![DLA](https://i.imgur.com/JOhwYBf.png)
 
+* Philosophers
+
+![Philosophers](https://i.imgur.com/hzRguFS.png)
+
 ## Table of Contents
 
 * [Barnsley fern](fern.rb)
@@ -54,5 +58,6 @@ Various small programs
 * [Lightning](lightning.tcl)
 * [Mortgage](money.ndf)
 * [Pea](pea.tcl)
+* [Philosophers](philosophers.tcl)
 * [Scrollbar](marker.tcl)
 * [Tarot](tarot.exs)

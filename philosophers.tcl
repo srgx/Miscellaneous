@@ -247,17 +247,10 @@ proc processNonEating {index} {
 proc getNeighbourIndices {index} {
 
   global e
-
-  if {0==$index} {
-    set l [expr {[llength $e]-2}]
-    set r [expr {$index+2}]
-  } elseif {([llength $e]-2)==$index} {
-    set l [expr {$index-2}]
-    set r 0
-  } else {
-    set l [expr {$index-2}]
-    set r [expr {$index+2}]
-  }
+  set lastP [expr {[llength $e]-2}]
+  
+  set l [expr {0==$index ? $lastP : $index-2}]
+  set r [expr {$lastP==$index ? 0 : $index+2}]
   
   return "$l $r"
   
@@ -342,12 +335,17 @@ every 25 {
     set rightNeIndex [lindex $neIndices 1]
     
     set startActivity 0
+    
     # Philosopher is eating
     if {1==$activity} {
+    
       processEating $j
+      
     # Philosopher is not eating
     } else {
+    
       processNonEating $j
+      
     }
     # Dont decrement if remaining time
     # is 0 or activity just started

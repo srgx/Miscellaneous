@@ -60,4 +60,5 @@ Various small programs
 * [Pea](pea.tcl)
 * [Philosophers](philosophers.tcl)
 * [Scrollbar](marker.tcl)
+* [Systolic array](systolic.tcl)
 * [Tarot](tarot.exs)

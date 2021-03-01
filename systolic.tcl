@@ -1,170 +1,212 @@
+#!/usr/bin/tclsh
 
+proc createList {} {
 
-proc phase1 {lst} {
- 
-  set len [llength $lst]
+  global inputSize
   
-  set newLst {}
-  for {set i 0} {$i < $len} {incr i} {
+  set newList {}
+  for {set i 0} {$i < $inputSize} {incr i} {
     lappend newLst {}
-  }
-  
-  set start [expr {[lindex $lst 0]=={} ? 1 : 0}]
-   
-  for {set i $start} {$i < ($len-1)} {incr i 2} {
-    lset newLst [expr {$i+1}] [lindex $lst $i]
   }
   
   return $newLst
   
 }
 
-proc phase2 {lst} {
+proc swapValues {} {
 
-  set len [llength $lst]
+  upvar toLeft toLeft toRight toRight
   
-  # Nowa lista
-  set newLst {}
-  for {set i 0} {$i < $len} {incr i} {
-    lappend newLst {}
+  if {$toLeft>$toRight} {
+    set temp $toRight
+    set toRight $toLeft
+    set toLeft $temp
   }
   
-  # Jeżeli ostatnia komórka
-  # zawiera jedną liczbę
-  # przesuń ją w lewo
-  set lastIndex [expr {$len-1}]
+}
+
+proc moveLastLeft {} {
+  
+  global inputSize
+  upvar lst lst newLst newLst
+
+  set lastIndex [expr {$inputSize-1}]
   set last [lindex $lst $lastIndex]
   if {[llength $last]==1} {
   
-    # Aktualna zawartość przedostatniej komórki
+    # Cell before last
     set newCell [lindex $lst [expr {$lastIndex-1}]]
     
-    # Przedostatnia komórka z ostatnim elementem
+    # Add last value
     lappend newCell $last
     
-    # Ustawienie wartości
+    # Update cell
     lset newLst [expr {$lastIndex-1}] $newCell
     
   }
+}
+
+proc compareAndPush {} {
+
+  upvar currentCell currentCell i i newLst newLst result result
+
+  set toLeft [lindex $currentCell 0] ; set toRight [lindex $currentCell 1]
+      
+  swapValues
   
-  # Środkowe komórki
-  for {set i 0} {$i<$len-1} {incr i} {
+  set leftIndex [expr {$i-1}]
+  set rightIndex [expr {$i+1}]
   
-    set curVal [lindex $lst $i]
+  if {$leftIndex<0} {
+    lappend result $toLeft
+  } else {
+    set currentLeft [lindex $newLst $leftIndex]
+    lappend currentLeft $toLeft
+    lset newLst $leftIndex $currentLeft
+  }
+  
+  set currentRight [lindex $newLst $rightIndex]
+  lappend currentRight $toRight
+  lset newLst $rightIndex $currentRight
+  
+}
+
+# Move value right or compare and push
+proc moveMidRight {} {
+
+  global inputSize
+  upvar lst lst newLst newLst
+
+  for {set i 0} {$i<$inputSize-1} {incr i} {
+  
+    set currentCell [lindex $lst $i]
     
-    if {[llength $curVal]==2} {
+    if {[llength $currentCell]==2} {
+      
+      # Move small value left and large value right
+      compareAndPush
     
-      set toLeft [lindex $curVal 0] ; set toRight [lindex $curVal 1]
-      
-      # Zamień wartości
-      if {$toLeft>$toRight} {
-        set temp $toRight
-        set toRight $toLeft
-        set toLeft $temp
-      }
-      
-      # Przesuń mniejszą w lewo
-      # a większą w prawo
-      set leftIndex [expr {$i-1}]
-      set rightIndex [expr {$i+1}]
-      
-      set currentLeft [lindex $newLst $leftIndex]
-      set currentRight [lindex $newLst $rightIndex]
-      
-      lappend currentLeft $toLeft
-      lappend currentRight $toRight
-      
-      lset newLst $leftIndex $currentLeft
-      lset newLst $rightIndex $currentRight
-      
-      
-    } elseif {[llength $curVal]==1} {
+    # Move 1 value right
+    } elseif {[llength $currentCell]==1} {
     
-      set nextIndex [expr {$i+1}]
-    
-      # Aktualna zawartość prawej komórki
-      set newCell [lindex $newLst $nextIndex]
-        
-      # Wartość z dodaną pierwszą komórką
-      lappend newCell $curVal
-      
-      # Ustawienie wartości
-      lset newLst $nextIndex $newCell
+      set value [lindex $currentCell 0]
+      move right
       
     }
     
+  }
+  
+}
+
+# Add value from input to first cell
+proc addAtFirst {} {
+
+  upvar i i input input index index newLst newLst
+
+  if {$i%2!=0} {
+    set newValue [lindex $input $index]
+    set cFirst [lindex $newLst 0]
+    lappend cFirst $newValue
+    lset newLst 0 $cFirst
+    incr index -1
+  }
+  
+}
+
+# Move single value left or right
+proc move {dir} {
+
+  upvar i i newLst newLst value value
+  
+  set nextIndex [expr {$i+($dir == "right" ? 1 : -1)}]
+  set nextCell [lindex $newLst $nextIndex]
+  lappend nextCell $value
+  lset newLst $nextIndex $nextCell
+  
+}
+
+# ---------------------------------------------------------
+
+proc stepPhase1 {lst} {
+  
+  global inputSize
+  upvar i i input input index index
+  
+  set newLst [createList]
+  set start [expr {[lindex $lst 0]=={} ? 1 : 0}]
+  
+  # Move all values right
+  for {set j $start} {$j < ($inputSize-1)} {incr j 2} {
+    lset newLst [expr {$j+1}] [lindex $lst $j]
+  }
+  
+  # Add number from input to first
+  # cell when step number is odd
+  addAtFirst
+  
+  return $newLst
+  
+}
+
+proc stepPhase2 {lst} {
+
+  global inputSize
+  upvar i i input input index index
+  
+  set newLst [createList]
+  
+  # If last cell contains 1
+  # value, move it left
+  moveLastLeft
+  
+  # Move 1 value right. Compare 2 values in
+  # cell and move them left and right
+  moveMidRight
+  
+  addAtFirst
+  
+  return $newLst
+  
+}
+
+proc stepPhase3 {lst} {
+
+  global result inputSize
+  
+  set newLst [createList]
+  
+  for {set i 0} {$i < $inputSize} {incr i} {
+  
+    set currentCell [lindex $lst $i]
+    set valuesInCell [llength $currentCell]
+    
+    if {$valuesInCell==1} {
+    
+      set value [lindex $currentCell 0]
+      
+      if {$i==0} {
+      
+        # Add single value from first cell to result
+        lappend result $value
+        
+      } else {
+      
+        move left
+        
+      }
+      
+    } elseif {$valuesInCell==2} {
+    
+      compareAndPush
+      
+    }
   }
   
   return $newLst
   
 }
 
-proc phase3 {lst} {
-  global result
-  
-  set len [llength $lst]
-  
-  # Nowa lista
-  set newLst {}
-  for {set i 0} {$i < $len} {incr i} {
-    lappend newLst {}
-  }
-  
-  for {set i 0} {$i < $len} {incr i} {
-    set curVal [lindex $lst $i]
-    set cLen [llength $curVal]
-    if {$cLen==1} {
-    
-      set val [lindex $curVal 0]
-      
-      if {$i==0} {
-        # Dodaj wartość do wyniku
-        lappend result $val
-      } else {
-      
-        # Przesuń w lewo
-        set leftIndex [expr {$i-1}]
-        
-        set leftVal [lindex $newLst $leftIndex]
-        lappend leftVal $val
-        lset newLst $leftIndex $leftVal
-      }
-      
-    } elseif {$cLen==2} {
-    
-      set toLeft [lindex $curVal 0] ; set toRight [lindex $curVal 1]
-      
-      # Zamień wartości
-      if {$toLeft>$toRight} {
-        set temp $toRight
-        set toRight $toLeft
-        set toLeft $temp
-      }
-      
-      # Przesuń mniejszą w lewo
-      # a większą w prawo
-      set leftIndex [expr {$i-1}]
-      set rightIndex [expr {$i+1}]
-      
-      if {$leftIndex<0} {
-        lappend result $toLeft
-      } else {
-        set currentLeft [lindex $newLst $leftIndex]
-        lappend currentLeft $toLeft
-        lset newLst $leftIndex $currentLeft
-      }
-      
-      
-      set currentRight [lindex $newLst $rightIndex]
-      lappend currentRight $toRight
-      lset newLst $rightIndex $currentRight
-      
-    }
-  }
-  
-  return $newLst
-  
-}
+# ---------------------------------------------------------
 
 set input {3 4 1 2}
 set cells {{} {} {} {}}
@@ -173,55 +215,35 @@ set index [expr {$inputSize-1}]
 
 puts "Input: $input"
 
-# Pierwsza faza
+# First phase
 for {set i 1} {$i <= $inputSize} {incr i} {
-
-  set cells [phase1 $cells]
-  
-  # Dodaj liczbą z inputu
-  # w nieparzystym kroku
-  if {$i%2!=0} {
-    lset cells 0 [lindex $input $index]
-    incr index -1
-  }
-  
+  set cells [stepPhase1 $cells]
 }
 
-puts "Po pierwszej fazie"
+puts "After first phase"
 puts $cells
 
-# Druga faza
+# Second phase
 for {set i 1} {$i <= $inputSize-1} {incr i} {
-
-  set cells [phase2 $cells]
-
-  # Dodaj liczbę z inputu
-  # w nieparzystym kroku
-  if {$i%2!=0} {
-    set newValue [lindex $input $index]
-    set cFirst [lindex $cells 0]
-    lappend cFirst $newValue
-    lset cells 0 $cFirst
-    incr index -1
-  }
-  
+  set cells [stepPhase2 $cells]
 }
 
-puts "Po drugiej fazie"
+puts "After second phase"
 puts $cells
 
 set result {}
 
-# Trzecia faza
-while {[llength $result]<4} {
-  set cells [phase3 $cells]
+# Third phase
+while {[llength $result]<$inputSize} {
+  set cells [stepPhase3 $cells]
 }
 
-puts "Po trzeciej fazie"
+puts "After third phase"
 puts $cells
 
-puts "Wynik"
+puts "Result"
 puts $result
+
 
 
 

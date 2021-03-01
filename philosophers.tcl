@@ -1,3 +1,4 @@
+#!/usr/bin/wish
 
 # Dining Philosophers - Procedures & Functions
 
@@ -149,11 +150,8 @@ proc drawFork {index direction} {
 proc processEating {index} {
 
   global e
-  upvar startActivity startActivity
-  upvar lForkIndex lForkIndex
-  upvar rForkIndex rForkIndex
-  upvar remTime remTime
-  upvar name name
+  upvar lForkIndex lForkIndex rForkIndex rForkIndex\
+        startActivity startActivity remTime remTime name name
   
   if {$remTime==0} {
   
@@ -182,12 +180,8 @@ proc processEating {index} {
 proc processNonEating {index} {
 
   global e
-  upvar name name
-  upvar leftNeIndex leftNeIndex
-  upvar rightNeIndex rightNeIndex
-  upvar lForkIndex lForkIndex
-  upvar rForkIndex rForkIndex
-  upvar remTime remTime
+  upvar name name leftNeIndex leftNeIndex rightNeIndex rightNeIndex\
+        lForkIndex lForkIndex rForkIndex rForkIndex remTime remTime
 
   # Attempt to change state
   if {0==$remTime} {

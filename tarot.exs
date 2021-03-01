@@ -1,3 +1,5 @@
+#!/usr/bin/elixir
+
 wielkie = [ "Głupiec", "Mag", "Papieżyca", "Cesarzowa", "Cesarz",
             "Papież", "Kochankowie", "Rydwan", "Sprawiedliwość",
             "Eremita", "Koło Fortuny", "Siła", "Wisielec", "Śmierć",

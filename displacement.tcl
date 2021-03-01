@@ -1,3 +1,5 @@
+#!/usr/bin/tclsh
+
 # Subtract vectors(arg1 - arg2)
 proc subtractVectors {arg1 arg2} {
  

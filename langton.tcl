@@ -1,4 +1,4 @@
-
+#!/usr/bin/wish
 
 # Main loop function
 proc every {ms body} {

@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'ruby2d'
 
 set background: 'white'

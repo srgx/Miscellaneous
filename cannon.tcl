@@ -1,4 +1,4 @@
-
+#!/usr/bin/wish
 
 # Check arguments
 if {$argc<2} {

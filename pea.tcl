@@ -1,3 +1,5 @@
+#!/usr/bin/tclsh
+
 proc gametes {pea} {
 
   set len [llength $pea]

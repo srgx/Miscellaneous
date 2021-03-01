@@ -1,3 +1,4 @@
+#!/usr/bin/wish
 
 # Inclusive
 proc rnd {min max} {

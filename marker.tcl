@@ -1,3 +1,5 @@
+#!/usr/bin/tclsh
+
 # find marker position based on text position
 proc calculateMarkerPosition { textPosition textHeight windowHeight } {
   return [expr {$textPosition / $textHeight * $windowHeight}]

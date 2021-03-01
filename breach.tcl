@@ -1,3 +1,4 @@
+#!/usr/bin/wish
 
 proc every {ms body} {
   eval $body; after $ms [namespace code [info level 0]]

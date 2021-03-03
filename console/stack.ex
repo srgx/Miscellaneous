@@ -3,56 +3,110 @@
 
 include std/sequence.e
 include std/get.e
+
 enum ADD, SUB, MUL, DIV
 sequence WORDS =
-  {"SWAP", "DUP", "OVER", "ROT","DROP",
-   "2SWAP", "2DUP", "2OVER", "2DROP",
-   "+", "-", "*", "/"}
+  {"SWAP", "DUP", "OVER", "ROT","DROP", "2SWAP", "2DUP", "2OVER", "2DROP", "+", "-", "*", "/"}
 
 sequence dictionary = {}
-sequence stack = {6,4,2}
-
-main()
+sequence stack = {}
 
 -----------------------------------------------------------
 
-procedure processInput(sequence input)
-  input = split(input)
-  if input[1][1] = 58 and input[length(input)][1] = 59 then
-    input = tail(slice(input, ,length(input)-1))
-    sequence newDefinition = {input[1]}
-    for i=1 to length(input) do
-      sequence currentWord = input[i]
-      if simpleWord(currentWord) then
-        newDefinition = append(newDefinition,currentWord)
-      else
-        newDefinition = splice(newDefinition,getDefinition(currentWord),length(newDefinition)+1)
-      end if
-    end for
-    dictionary = append(dictionary,newDefinition)
-  else
-    for i=1 to length(input) do
-      execute(input[i])
-    end for
-  end if
-end procedure
+tests()
+
+-----------------------------------------------------------
 
 procedure main()
+  puts(1,"Run Interactive Session\n")
+end procedure
 
-  processInput(": POZAR ROT DUP ;")
-  processInput(": KALINA SWAP POZAR SWAP POZAR SWAP ;")
+procedure tests()
+
+  processInput(": RODUP ROT DUP ;")
+  processInput(": PRO SWAP RODUP SWAP RODUP SWAP ;")
+  processInput(": SFUNC + 2 * 66 ;")
+  processInput(": FNS SFUNC SFUNC ;")
   
-  puts(1,"Słownik:\n")
+  puts(1,"Dictionary\n")
   showDictionary()
-  
-  puts(1,"Stos: ")
+
+  puts(1,"Stack: ")
   showStack()
   
-  processInput("+ + 16 1")
+  processInput("5 6 SFUNC +")
   
-  puts(1,"Stos: ")
+  puts(1,"Stack: ")
   showStack()
   
+end procedure
+
+-----------------------------------------------------------
+
+procedure addDefinition(sequence input)
+  
+  -- Drop ':' and ';' symbols
+  input = tail(slice(input, ,length(input)-1))
+  
+  -- First word is definition name
+  sequence newDefinition = {input[1]}
+  
+  -- Add other words
+  for i=2 to length(input) do
+  
+    sequence currentWord = input[i]
+    
+    -- Simple word
+    if simpleWord(currentWord) then
+      newDefinition = append(newDefinition,currentWord)
+    else
+    
+      -- Number
+      sequence maybeNumber = value(currentWord)
+      if maybeNumber[1] = GET_SUCCESS then
+        newDefinition = append(newDefinition,currentWord)
+        
+      -- Previously defined word
+      else
+      
+        sequence definition = getDefinition(currentWord)
+        
+        if not equal(definition,{}) then
+          newDefinition = splice(newDefinition,definition,length(newDefinition)+1)
+        else
+          puts(1,"Error\n")
+        end if
+        
+      end if
+      
+    end if
+    
+  end for
+  
+  dictionary = append(dictionary,newDefinition)
+  
+end procedure
+
+-- Execute sequence of simple words
+procedure executeWords(sequence input)
+  for i=1 to length(input) do
+    execute(input[i])
+  end for
+end procedure
+
+-- Check if user input is word definition
+function isDefinition(sequence input)
+  return input[1][1] = 58 and input[length(input)][1] = 59
+end function
+
+-- Process word definition or sequence of words
+procedure processInput(sequence input)
+  input = split(input)
+  if isDefinition(input) then
+    addDefinition(input)
+  else
+    executeWords(input)
+  end if
 end procedure
 
 -----------------------------------------------------------
@@ -168,14 +222,15 @@ procedure showStack()
     end for
     puts(1,"\n")
   else
-    puts(1,"empty\n")
+    puts(1,"--\n")
   end if
 end procedure
 
 procedure showDictionary()
   for i=1 to length(dictionary) do
     sequence definition = dictionary[i]
-    for j=1 to length(definition) do
+    printf(1,"%s: ",{definition[1]})
+    for j=2 to length(definition) do
       printf(1,"%s ",{definition[j]})
     end for
     puts(1,"\n")
@@ -202,6 +257,8 @@ function getDefinition(sequence word)
 end function
 
 procedure execute(sequence word)
+
+  -- Simple function
   if simpleWord(word) then
     switch word do
       case "+" then
@@ -222,15 +279,35 @@ procedure execute(sequence word)
         rot()
       case "DROP" then
         drop()
+      case "2SWAP" then
+        swap2()
+      case "2DUP" then
+        dup2()
+      case "2OVER" then
+        over2()
+      case "2DROP" then
+        drop2()
     end switch
   else
-    sequence answer = value(word)
-    if answer[1] = GET_SUCCESS then
-      push(answer[2])
+  
+    -- Defined word
+    sequence definition = getDefinition(word)
+    if not equal(definition,{}) then
+      executeWords(definition)
     else
-      puts(1,"Nieprawidłowa wartość\n")
+    
+      -- Number
+      sequence answer = value(word)
+      if answer[1] = GET_SUCCESS then
+        push(answer[2])
+      else
+        puts(1,"Wrong value\n")
+      end if
+      
     end if
+    
   end if
+  
 end procedure
 
 -----------------------------------------------------------

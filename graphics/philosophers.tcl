@@ -62,7 +62,7 @@ proc drawShapes {numShapes currentAngle distanceFromCenter radius color} {
 # Draw large circle
 proc drawTable {} {
 
-  global tableRadius numPhi middleX middleY
+  global tableRadius numPhi middleX middleY tableColor
 
   # Table top-left and bottom-right
   set x1 150 ; set y1 70
@@ -77,7 +77,7 @@ proc drawTable {} {
   # Draw table
   .can create oval\
     $x1 $y1 $x2 $y2\
-    -outline red -fill purple
+    -outline red -fill $tableColor
     
   # Draw middle dot
   .can create oval\
@@ -89,7 +89,8 @@ proc drawTable {} {
 # Draw all shapes
 proc drawCircles {numPhi} {
 
-  global radiansBetweenShapes phiRad forkRad philoPoints forkPoints
+  global radiansBetweenShapes phiRad forkRad\
+         philoPoints forkPoints forkColor philosopherColor
 
   # Table
   drawTable
@@ -100,7 +101,7 @@ proc drawCircles {numPhi} {
   # Philosophers
   set philoPoints\
     [drawShapes $numPhi $initialAngle\
-    $philosophersFromCenter $phiRad black]
+    $philosophersFromCenter $phiRad $philosopherColor]
 
   set forksFromCenter 70
   set initialAngle [expr {$radiansBetweenShapes/2}]
@@ -108,14 +109,14 @@ proc drawCircles {numPhi} {
   # Forks
   set forkPoints\
     [drawShapes $numPhi $initialAngle\
-    $forksFromCenter $forkRad yellow]
+    $forksFromCenter $forkRad $forkColor]
     
 }
 
 # Draw one fork
 proc drawFork {index direction} {
 
-  global forkPoints philoPoints
+  global forkPoints philoPoints handColor
 
   # Philosopher centrum position
   set pIndex [expr {$index/2}]
@@ -142,7 +143,7 @@ proc drawFork {index direction} {
     [lindex $philoPoint 1]\
     [lindex $fPoint 0]\
     [lindex $fPoint 1]\
-    -fill yellow -tag $pIndex-$symbol
+    -fill $handColor -tag $pIndex-$symbol
   
 }
 
@@ -261,6 +262,11 @@ proc deleteForks {index} {
 # ---------------------------------------------------------
 
 # Philosophers & Forks Data
+
+set philosopherColor black
+set handColor yellow
+set tableColor red
+set forkColor blue
 
 # { Name, Remaining time, State }
 # State ( 1 - Eating, 0 - Thinking )

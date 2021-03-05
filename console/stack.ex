@@ -1,24 +1,38 @@
-/* Euphoria Stack Programming */
+/* Stack Programming */
 -----------------------------------------------------------
 
 include std/sequence.e
 include std/get.e
+include std/text.e
 
 enum ADD, SUB, MUL, DIV
 sequence WORDS =
-  {"SWAP", "DUP", "OVER", "ROT","DROP", "2SWAP", "2DUP", "2OVER", "2DROP", "+", "-", "*", "/"}
+  {"SWAP", "DUP", "OVER", "ROT","DROP", "2SWAP",
+   "2DUP", "2OVER", "2DROP", ".S", "+", "-", "*", "/"}
 
 sequence dictionary = {}
 sequence stack = {}
+integer stop = 0
 
 -----------------------------------------------------------
 
-tests()
+--tests()
+main()
 
 -----------------------------------------------------------
 
 procedure main()
-  puts(1,"Run Interactive Session\n")
+  puts(1,"        *** Stack Programming ***\n")
+  puts(1,"-----------------------------------------\n")
+  puts(1,"Show stack: '.s'. Exit: 'bye'.\n")
+  puts(1,"-----------------------------------------\n")
+  while 1 do
+    sequence line = gets(0)
+    processInput(upper(slice(line, ,length(line)-1)))
+    if stop then
+      exit
+    end if
+  end while
 end procedure
 
 procedure tests()
@@ -90,7 +104,13 @@ end procedure
 -- Execute sequence of simple words
 procedure executeWords(sequence input)
   for i=1 to length(input) do
-    execute(input[i])
+    sequence word = input[i]
+    if equal(word,"BYE") then
+      stop = 1
+      exit
+    else
+      execute(word)
+    end if
   end for
 end procedure
 
@@ -142,7 +162,13 @@ procedure rot()
 end procedure
 
 procedure drop()
-  stack = slice(stack, ,length(stack)-1)
+  integer le = length(stack)
+  if le = 1 then
+    stack = {}
+  else
+    stack = slice(stack, ,le-1)
+  end if
+  
 end procedure
 
 -----------------------------------------------------------
@@ -216,8 +242,10 @@ end procedure
 -----------------------------------------------------------
 
 procedure showStack()
-  if length(stack) != 0 then
-    for i=1 to length(stack) do
+  integer le = length(stack)
+  printf(1,"<%d> ",le)
+  if le != 0 then
+    for i=1 to le do
       printf(1,"%d ",stack[i])
     end for
     puts(1,"\n")
@@ -269,6 +297,8 @@ procedure execute(sequence word)
         mul()
       case "/" then
         div()
+      case ".S" then
+        showStack()
       case "SWAP" then
         swap()
       case "DUP" then

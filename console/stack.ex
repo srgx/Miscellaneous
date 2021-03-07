@@ -168,7 +168,6 @@ procedure drop()
   else
     stack = slice(stack, ,le-1)
   end if
-  
 end procedure
 
 -----------------------------------------------------------

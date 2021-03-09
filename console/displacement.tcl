@@ -4,18 +4,22 @@ oo::class create Program {
 
   constructor {} {
   
-    set from "5 5" ; set to "9 9"
-    
+    variable from "5 5"
+    variable to "9 9"
     variable totalTime 200.
     variable currentTime 0
-    variable totalDisplacement [my subtractVectors $to $from]
+    variable totalDisplacement [my subtractVectors]
     variable proportion
     
   }
   
-  method subtractVectors {arg1 arg2} {
-    return "[expr {[lindex $arg1 0] - [lindex $arg2 0]}]\
-            [expr {[lindex $arg1 1] - [lindex $arg2 1]}]"
+  method subtractVectors {} {
+  
+    variable from
+    variable to
+  
+    return "[expr {[lindex $to 0] - [lindex $from 0]}]\
+            [expr {[lindex $to 1] - [lindex $from 1]}]"
   }
   
   method scaleVector {} {

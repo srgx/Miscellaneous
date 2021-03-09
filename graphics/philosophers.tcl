@@ -1,360 +1,378 @@
 #!/usr/bin/wish
 
-# Dining Philosophers - Procedures & Functions
+oo::class create Program {
 
-# Loop and line
-proc every {ms body} {
-  eval $body; after $ms [namespace code [info level 0]]
-}
-proc line {} {
-  puts "-------------------------------------------------"
-}
+  constructor {} {
+  
+    variable philosopherColor black
+    variable handColor yellow
+    variable tableColor red
+    variable forkColor blue
+    variable tableMiddleX
+    variable tableMiddleY
+    variable numPhilosophers 5
+    variable tableRadius 95
+    variable philosopherRadius 27
+    variable forkRadius 10
+    variable angle [expr {360/$numPhilosophers}]
+    variable radiansBetweenShapes [expr {$angle*0.0174532925}]
+    variable forkPoints
+    variable philoPoints
+    variable startActivity
 
-# Random functions
-proc rnd {min max} { expr {int(rand()*($max+1-$min))+$min} }
-proc getRandom {} { return [rnd 5 20] }
+    # { Name, Remaining time, State }
+    # State ( 1 - Eating, 0 - Thinking )
+    variable tableState "
 
-
-# Draw Philosophers & Forks
-proc drawShapes {numShapes currentAngle distanceFromCenter radius color} {
-
-  global middleX middleY radiansBetweenShapes ; set points {}
-
-  for {set i 0} {$i < $numShapes} {incr i} {
-
-    # Unit vector
-    set vecX [expr {cos($currentAngle)}] ; set vecY [expr {sin($currentAngle)}]
+      {Arystoteles [my getRandom] 0}
+      0
+      {Platon [my getRandom] 0}
+      0
+      {Kartezjusz [my getRandom] 0}
+      0
+      {Sokrates [my getRandom] 0}
+      0
+      {Augustyn [my getRandom] 0}
+      0
+      
+    "
     
-    # Central point of philosopher/fork
-    set pointX\
-      [expr {$middleX+$vecX*$distanceFromCenter}]
-    set pointY\
-      [expr {$middleY-$vecY*$distanceFromCenter}]
-    
-    # List of positions
-    lappend points "$pointX $pointY"
+    variable lastPhilosopherIndex [expr {[llength $tableState]-2}]
 
-    # Top left circle position
-    set newX\
-      [expr {$pointX-$radius}]
-    set newY\
-      [expr {$pointY-$radius}]
+    my createCanvas
     
-    set shapeDiameter [expr {$radius*2}]
+  }
+
+  
+  method createCanvas {} {
+  
+    canvas .can
+    .can configure -width 854
+    .can configure -height 480
     
-    # Draw circle
+    pack .can
+    wm title . "Dinner"
+
+    my drawAllShapes
+
+  }
+  
+  method drawAllShapes {} {
+  
+    variable numPhilosophers
+    variable radiansBetweenShapes
+    variable philosopherRadius
+    variable forkRadius
+    variable forkColor
+    variable philosopherColor
+    variable forkPoints
+    variable philoPoints
+
+    my drawTable
+
+    set philosophersFromCenter 130
+    set initialAngle $radiansBetweenShapes
+
+    # Philosophers
+    set philoPoints\
+      [my drawShapes\
+        $initialAngle $philosophersFromCenter\
+        $philosopherRadius $philosopherColor]
+
+    set forksFromCenter 70
+    set initialAngle [expr {$radiansBetweenShapes/2}]
+
+    # Forks
+    set forkPoints\
+      [my drawShapes\
+        $initialAngle $forksFromCenter\
+        $forkRadius $forkColor]
+    
+  }
+  
+  method drawTable {} {
+    
+    variable tableRadius
+    variable tableColor
+    variable tableMiddleX
+    variable tableMiddleY
+
+    # Table top-left and bottom-right
+    set x1 150 ; set y1 70
+    set tableDiameter [expr {$tableRadius*2}]
+    set x2 [expr {$x1+$tableDiameter}]
+    set y2 [expr {$y1+$tableDiameter}]
+
+    # Table center
+    set tableMiddleX [expr {$x1+$tableRadius}]
+    set tableMiddleY [expr {$y1+$tableRadius}]
+
+    # Draw table
     .can create oval\
-      $newX $newY\
-      [expr {$newX+$shapeDiameter}]\
-      [expr {$newY+$shapeDiameter}]\
-      -outline $color -fill $color
+      $x1 $y1 $x2 $y2\
+      -outline red -fill $tableColor
       
-    # Angle for next shape
-    set currentAngle [expr {$currentAngle+$radiansBetweenShapes}]
-  
+    # Draw middle dot
+    .can create oval\
+      $tableMiddleX $tableMiddleY $tableMiddleX $tableMiddleY\
+      -outline red -fill red
+    
   }
   
-  # Return list of positions
-  return $points
+  method drawShapes {currentAngle distanceFromCenter radius color} {
   
-}
+    variable tableMiddleX
+    variable tableMiddleY
+    variable radiansBetweenShapes
+    variable numPhilosophers
 
-# Draw large circle
-proc drawTable {} {
+    set points {}
 
-  global tableRadius numPhi middleX middleY tableColor
+    for {set i 0} {$i < $numPhilosophers} {incr i} {
 
-  # Table top-left and bottom-right
-  set x1 150 ; set y1 70
-  set tableDiameter [expr {$tableRadius*2}]
-  set x2 [expr {$x1+$tableDiameter}]
-  set y2 [expr {$y1+$tableDiameter}]
+      # Unit vector
+      set vecX [expr {cos($currentAngle)}] ; set vecY [expr {sin($currentAngle)}]
+      
+      # Central point of philosopher/fork
+      set pointX\
+        [expr {$tableMiddleX+$vecX*$distanceFromCenter}]
+      set pointY\
+        [expr {$tableMiddleY-$vecY*$distanceFromCenter}]
+      
+      # List of positions
+      lappend points "$pointX $pointY"
 
-  # Table center
-  set middleX [expr {$x1+$tableRadius}]
-  set middleY [expr {$y1+$tableRadius}]
-
-  # Draw table
-  .can create oval\
-    $x1 $y1 $x2 $y2\
-    -outline red -fill $tableColor
-    
-  # Draw middle dot
-  .can create oval\
-    $middleX $middleY $middleX $middleY\
-    -outline red -fill red
-    
-}
-
-# Draw all shapes
-proc drawCircles {numPhi} {
-
-  global radiansBetweenShapes phiRad forkRad\
-         philoPoints forkPoints forkColor philosopherColor
-
-  # Table
-  drawTable
-
-  set philosophersFromCenter 130
-  set initialAngle $radiansBetweenShapes
-
-  # Philosophers
-  set philoPoints\
-    [drawShapes $numPhi $initialAngle\
-    $philosophersFromCenter $phiRad $philosopherColor]
-
-  set forksFromCenter 70
-  set initialAngle [expr {$radiansBetweenShapes/2}]
-
-  # Forks
-  set forkPoints\
-    [drawShapes $numPhi $initialAngle\
-    $forksFromCenter $forkRad $forkColor]
-    
-}
-
-# Draw one fork
-proc drawFork {index direction} {
-
-  global forkPoints philoPoints handColor
-
-  # Philosopher centrum position
-  set pIndex [expr {$index/2}]
-  set philoPoint [lindex $philoPoints $pIndex]
-  
-  # Fork centrum position
-  # Symbol identifies left/right fork
-  set fPoint {} ; set symbol {}
-  if {$direction=="right"} {
-    set symbol 1
-    if {4==$pIndex} {
-      set fPoint [lindex $forkPoints 0]
-    } else {
-      set fPoint [lindex $forkPoints [expr {$pIndex+1}]]
-    }
-  } elseif {$direction=="left"} {
-    set symbol 0
-    set fPoint [lindex $forkPoints $pIndex]
-  }
-  
-  # Create line
-  .can create line\
-    [lindex $philoPoint 0]\
-    [lindex $philoPoint 1]\
-    [lindex $fPoint 0]\
-    [lindex $fPoint 1]\
-    -fill $handColor -tag $pIndex-$symbol
-  
-}
-
-# Eating philosopher
-proc processEating {index} {
-
-  global e
-  upvar lForkIndex lForkIndex rForkIndex rForkIndex\
-        startActivity startActivity remTime remTime name name
-  
-  if {$remTime==0} {
-  
-    puts "$name skończył jeść i zaczyna myśleć"
-    
-    # Change state to thinking
-    lset e $index 2 0
-    
-    # Random thinking time
-    lset e $index 1 [getRandom]
-    
-    # Put forks down
-    lset e $lForkIndex 0
-    lset e $rForkIndex 0
-    
-    deleteForks $index
-    
-    set startActivity 1
-  } else {
-    puts "$name jest w trakcie jedzenia ($remTime)"
-  }                                                   
-}
-
-
-# Non-eating philosopher
-proc processNonEating {index} {
-
-  global e
-  upvar name name leftNeIndex leftNeIndex rightNeIndex rightNeIndex\
-        lForkIndex lForkIndex rForkIndex rForkIndex remTime remTime
-
-  # Attempt to change state
-  if {0==$remTime} {
-    # Neighbours
-    set leftN [lindex $e $leftNeIndex]
-    set rightN [lindex $e $rightNeIndex]
-    
-    # Someone is using left fork
-    if {[lindex $e $lForkIndex]==1} {
-    
-      # Its neighbour
-      if {[lindex $leftN 2]==1} {
-        puts "$name nie może wziąć lewego widelca"
+      # Top left circle position
+      set newX\
+        [expr {$pointX-$radius}]
+      set newY\
+        [expr {$pointY-$radius}]
+      
+      set shapeDiameter [expr {$radius*2}]
+      
+      # Draw circle
+      .can create oval\
+        $newX $newY\
+        [expr {$newX+$shapeDiameter}]\
+        [expr {$newY+$shapeDiameter}]\
+        -outline $color -fill $color
         
-      # Its me
+      # Angle for next shape
+      set currentAngle [expr {$currentAngle+$radiansBetweenShapes}]
+    
+    }
+  
+    # Return list of positions
+    return $points
+  
+  }
+  
+  method rnd {min max} { expr {int(rand()*($max+1-$min))+$min} }
+  method getRandom {} { return [my rnd 5 20] }
+  
+  method update {} {
+  
+    variable lastPhilosopherIndex
+    variable tableState
+  
+    for {set j 0} {$j <= $lastPhilosopherIndex} {incr j 2} {
+    
+      set startActivity 0
+      set remTime [lindex $tableState $j 1]
+      set activity [lindex $tableState $j 2]
+      
+      if {1==$activity} {
+        my processEating $j
       } else {
-      
-        # Get right fork if its free
-        if {[lindex $e $rForkIndex]!=1} {
-        
-          puts "$name podnosi prawy widelec i zaczyna jeść"
-          
-          drawFork $index right
-          
-          # Get right fork
-          lset e $rForkIndex 1
-          
-          # Change status
-          lset e $index 2 1
-          
-          # Set eating time
-          lset e $index 1 [getRandom]
-          
-          set startActivity 1
-          
-        # I cant get right fork
-        } else {
-          puts "$name nie może wziąć prawego widelca"
-        }
+        my processNonEating $j
       }
-    } else {
-    
-      # Get left fork
-      lset e $lForkIndex 1
-      puts "$name podnosi lewy widelec"
-      drawFork $index left
+      
+      # Dont decrement if remaining time
+      # is 0 or activity just started
+      if {!$startActivity&&$remTime > 0} {
+        lset tableState $j 1 [expr {$remTime-1}]
+      }
       
     }
     
-  } else {
-    puts "$name myśli ($remTime)"
-  }       
-}
-
-
-# Neighbours
-proc getNeighbourIndices {index} {
-
-  global e
-  set lastP [expr {[llength $e]-2}]
+    my line
+    
+  }
   
-  set l [expr {0==$index ? $lastP : $index-2}]
-  set r [expr {$lastP==$index ? 0 : $index+2}]
+  method getNeighbourIndices {index} {
+
+    variable tableState
+    
+    set lastP [expr {[llength $tableState]-2}]
+    set l [expr {0==$index ? $lastP : $index-2}]
+    set r [expr {$lastP==$index ? 0 : $index+2}]
+    
+    return "$l $r"
   
-  return "$l $r"
+  }
   
-}
+  method processNonEating {index} {
 
-
-# Delete both forks
-proc deleteForks {index} {  
-  set pIndex [expr {$index/2}]
-    .can delete $pIndex-0
-    .can delete $pIndex-1
-}
-
-# ---------------------------------------------------------
-
-# Philosophers & Forks Data
-
-set philosopherColor black
-set handColor yellow
-set tableColor red
-set forkColor blue
-
-# { Name, Remaining time, State }
-# State ( 1 - Eating, 0 - Thinking )
-set e "
-
-  {Arystoteles [getRandom] 0}
-  0
-  {Platon [getRandom] 0}
-  0
-  {Kartezjusz [getRandom] 0}
-  0
-  {Sokrates [getRandom] 0}
-  0
-  {Augustyn [getRandom] 0}
-  0
-  
-"
-
-# Initialize Variables & Shapes
-
-# Number of philosophers and forks
-set numPhi 5
-
-# Table, philosopher, fork radii
-set tableRadius 95 ; set phiRad 27 ; set forkRad 10
-
-# Angle between philosophers and forks
-set angle [expr {360/$numPhi}]
-set radiansBetweenShapes [expr {$angle*0.0174532925}]
-
-set lastPhilosopherIndex [expr {[llength $e]-2}]
-
-# Create canvas
-canvas .can
-.can configure -width 854
-.can configure -height 480
-
-
-# Draw all shapes
-drawCircles $numPhi
-
-pack .can
-wm title . "Dinner"
-
-# ---------------------------------------------------------
-
-# Main loop
-every 25 {
-
-  global lastPhilosopherIndex e forkPoints philoPoints
-  
-  for {set j 0} {$j <= $lastPhilosopherIndex} {incr j 2} {
-  
-    # Philosopher data
-    set philo [lindex $e $j]
+    variable tableState
+    variable startActivity
+    
+    set philo [lindex $tableState $index]
     set name [lindex $philo 0]
     set remTime [lindex $philo 1]
-    set activity [lindex $philo 2]
-    
-    # Fork indices
-    set rForkIndex [expr {$j+1}]
-    set lForkIndex [expr {0==$j ? 9 : $j-1}]
-  
-    set neIndices [getNeighbourIndices $j]
+    set rForkIndex [expr {$index+1}]
+    set lForkIndex [my getLForkIndex $index]
+    set neIndices [my getNeighbourIndices $index]
     set leftNeIndex [lindex $neIndices 0]
     set rightNeIndex [lindex $neIndices 1]
     
-    set startActivity 0
+    # Attempt to change state
+    if {0==$remTime} {
     
-    # Philosopher is eating
-    if {1==$activity} {
-    
-      processEating $j
+      # Neighbours
+      set leftN [lindex $tableState $leftNeIndex]
+      set rightN [lindex $tableState $rightNeIndex]
       
-    # Philosopher is not eating
+      # Someone is using left fork
+      if {[lindex $tableState $lForkIndex]==1} {
+      
+        # Its neighbour
+        if {[lindex $leftN 2]==1} {
+          puts "$name nie może wziąć lewego widelca"
+          
+        # Its me
+        } else {
+        
+          # Get right fork if its free
+          if {[lindex $tableState $rForkIndex]!=1} {
+          
+            puts "$name podnosi prawy widelec i zaczyna jeść"
+            
+            my drawHand $index right
+            
+            # Get right fork
+            lset tableState $rForkIndex 1
+            
+            # Change status
+            lset tableState $index 2 1
+            
+            # Set eating time
+            lset tableState $index 1 [my getRandom]
+            
+            set startActivity 1
+            
+          # I cant get right fork
+          } else {
+            puts "$name nie może wziąć prawego widelca"
+          }
+          
+        }
+          
+      } else {
+        
+        # Get left fork
+        lset tableState $lForkIndex 1
+        puts "$name podnosi lewy widelec"
+        my drawHand $index left
+          
+      }
+        
     } else {
-    
-      processNonEating $j
-      
-    }
-    # Dont decrement if remaining time
-    # is 0 or activity just started
-    if {!$startActivity&&$remTime > 0} {
-      lset e $j 1 [expr {$remTime-1}]
+      puts "$name myśli ($remTime)"
     }
     
   }
   
-  line
+  method getLForkIndex {index} {
+    return [expr {0==$index ? 9 : $index-1}]
+  }
   
-}                                                                
+  method processEating {index} {
+
+    variable tableState
+    variable startActivity
+    
+    set philo [lindex $tableState $index]
+    set name [lindex $philo 0]
+    set remTime [lindex $philo 1]
+    set rForkIndex [expr {$index+1}]
+    set lForkIndex [my getLForkIndex $index]
+    
+    if {$remTime==0} {
+    
+      puts "$name skończył jeść i zaczyna myśleć"
+      
+      # Change state to thinking
+      lset tableState $index 2 0
+      
+      # Random thinking time
+      lset tableState $index 1 [my getRandom]
+      
+      # Put forks down
+      lset tableState $lForkIndex 0
+      lset tableState $rForkIndex 0
+      
+      my deleteForks $index
+      
+      set startActivity 1
+      
+    } else {
+      puts "$name jest w trakcie jedzenia ($remTime)"
+    }
+  }
+  
+  method drawHand {index direction} {
+    
+    variable forkPoints
+    variable philoPoints
+    variable handColor
+
+    # Philosopher center
+    set pIndex [expr {$index/2}]
+    set philoPoint [lindex $philoPoints $pIndex]
+    
+    # Fork center
+    # Symbol identifies left/right fork
+    set fPoint {} ; set symbol {}
+    if {$direction=="right"} {
+      set symbol 1
+      if {4==$pIndex} {
+        set fPoint [lindex $forkPoints 0]
+      } else {
+        set fPoint [lindex $forkPoints [expr {$pIndex+1}]]
+      }
+    } elseif {$direction=="left"} {
+      set symbol 0
+      set fPoint [lindex $forkPoints $pIndex]
+    }
+    
+    .can create line\
+      [lindex $philoPoint 0]\
+      [lindex $philoPoint 1]\
+      [lindex $fPoint 0]\
+      [lindex $fPoint 1]\
+      -fill $handColor -tag $pIndex-$symbol
+  
+  }
+  
+  # Delete both forks
+  method deleteForks {index} {  
+    set pIndex [expr {$index/2}]
+    .can delete $pIndex-0
+    .can delete $pIndex-1
+  }
+  
+  method line {} {
+    puts "-------------------------------------------------"
+  }
+  
+}
+
+proc every {ms body} {
+  eval $body; after $ms [namespace code [info level 0]]
+}
+
+
+# ----------------------------------------------
+set program [Program new]
+every 25 { global program ; $program update }
+# ----------------------------------------------

@@ -40,7 +40,7 @@ Various small programs
 
 * Philosophers
 
-![Philosophers](https://i.imgur.com/hzRguFS.png)
+![Philosophers](https://i.imgur.com/nC0A01A.png)
 
 ## Table of Contents
 

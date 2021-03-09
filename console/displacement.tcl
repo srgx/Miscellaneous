@@ -1,49 +1,61 @@
 #!/usr/bin/tclsh
 
-# Subtract vectors(arg1 - arg2)
-proc subtractVectors {arg1 arg2} {
- 
-  return "[expr {[lindex $arg1 0] - [lindex $arg2 0]}]\
-          [expr {[lindex $arg1 1] - [lindex $arg2 1]}]"
+oo::class create Program {
+
+  constructor {} {
   
-}
-
-# Scale vector
-proc scaleVector {vector sc} { 
-  
-  return "[expr {[lindex $vector 0] * $sc}]\
-          [expr {[lindex $vector 1] * $sc}]"
-  
-}
-
-proc positionAfterTime {totalDisplacement totalTime currentTime} {
-  
-  # Time proportion
-  set proportion [expr {$currentTime / $totalTime}]
-  
-  # Return new vector
-  return [scaleVector $totalDisplacement $proportion]
-  
-}
-
-# Move from a to b in time totalTime
-set a "5 5"
-set b "9 9"
-set totalTime 200.
-
-# Calculate total displacement
-set totalDisplacement [subtractVectors $b $a]
-
-# Current time
-set currentTime 0
-
-for {set i 0} {$i < 5} {incr i} {
-
-    set displ [positionAfterTime $totalDisplacement $totalTime $currentTime]
+    set from "5 5" ; set to "9 9"
     
-    puts "Displacement after $currentTime seconds: ([lindex $displ 0],[lindex $displ 1])"
+    variable totalTime 200.
+    variable currentTime 0
+    variable totalDisplacement [my subtractVectors $to $from]
+    variable proportion
+    
+  }
+  
+  method subtractVectors {arg1 arg2} {
+    return "[expr {[lindex $arg1 0] - [lindex $arg2 0]}]\
+            [expr {[lindex $arg1 1] - [lindex $arg2 1]}]"
+  }
+  
+  method scaleVector {} {
+  
+    variable proportion
+    variable totalDisplacement
+    
+    return "[expr {[lindex $totalDisplacement 0] * $proportion}]\
+            [expr {[lindex $totalDisplacement 1] * $proportion}]"
+            
+  }
+
+  method positionAfterTime {} {
+  
+    variable currentTime
+    variable totalTime
+    variable proportion
+    
+    set proportion [expr {$currentTime / $totalTime}]
+    
+    return [my scaleVector]
+  
+  }
+  
+  method update {} {
+    
+    variable currentTime
+  
+    set displacement [my positionAfterTime]
+    
+    puts "Displacement after $currentTime seconds:\
+          ([lindex $displacement 0],[lindex $displacement 1])"
     
     if {$currentTime < 200} { set currentTime [expr {$currentTime + 50}] }
     
+  }
+  
 }
+
+
+set program [Program new]
+for {set i 0} {$i < 5} {incr i} { $program update }
 

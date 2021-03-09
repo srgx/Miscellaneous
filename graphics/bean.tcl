@@ -4,17 +4,10 @@ oo::class create Program {
 
   constructor {nRows} {
   
-    variable position
-    set position {0 0}
-    
-    variable rows
-    set rows [expr {$nRows+1}]
-    
-    variable diameter
-    set diameter 7
-    
-    variable targets
-    set targets {}
+    variable position {0 0}
+    variable rows [expr {$nRows+1}]
+    variable diameter 7
+    variable targets {}
     
     my createBalls
     

@@ -48,6 +48,10 @@ procedure main()
   
   printf(1,"Całkowita odległość: %f\n",totalDistance)
   
+  ---------------------------------------------------------
+  
+  unvisitAllCities()
+  
   -- Sorted edges
   sequence collected = custom_sort(routine_id("byDistance"),collectEdges())
   
@@ -57,6 +61,17 @@ procedure main()
   -- Number of connected edges
   print(1,degrees)
   puts(1,"\n")
+  
+  for i=1 to length(collected) do
+  
+    sequence currentEdge = collected[i]
+    integer fromCity = currentEdge[1]
+    integer toCity = currentEdge[2]
+    atom distance = currentEdge[3]
+    
+    
+    
+  end for
   
 end procedure
 
@@ -152,6 +167,10 @@ procedure visitCity(integer i)
   cities[i][1] = 1
 end procedure
 
+procedure unvisitCity(integer i)
+  cities[i][1] = 0
+end procedure
+
 function cityVisited(integer i)
   return cities[i][1]
 end function
@@ -167,5 +186,11 @@ end function
 function cityPosition(sequence city)
   return {cityX(city),cityY(city)}
 end function
+
+procedure unvisitAllCities()
+  for i=1 to length(cities) do
+    unvisitCity(i)
+  end for
+end procedure
 
 -----------------------------------------------------------

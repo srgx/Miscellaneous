@@ -89,41 +89,27 @@ define method byCols(g,i,j,n)
 end method;
 
 define method checkLines(g :: <game>, fn)
-
   let result = #t;
-  
-  for (i from 0 to 8)
-  
-    for (n from 1 to 9)
-    
-      let hasN = #f;
-      
-      for (j from 0 to 8)
-      
-        // Go through row or column
-        if (fn(g,i,j,n))
-          hasN := #t;
-          break;
+  block (break)
+    for (i from 0 to 8)
+      for (n from 1 to 9)
+        let hasN = #f;
+        block (break)
+          for (j from 0 to 8)
+            if (fn(g,i,j,n))
+              hasN := #t;
+              break();
+            end if;
+          end;
+        end block;
+        if (~hasN)
+          result := #f;
+          break();
         end if;
-        
       end;
-      
-      // Return false
-      if (~hasN)
-        result := #f;
-        break;
-      end if;
-      
     end;
-    
-    if (~result)
-      break;
-    end if;
-    
-  end;
-    
+  end block;
   result
-  
 end method;
 
 define method checkRows(g :: <game>)

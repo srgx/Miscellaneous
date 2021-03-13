@@ -5,9 +5,12 @@ oo::class create Program {
 
   constructor {} {
   
+    # Algorithm input
     variable input {3 4 1 2}
-    variable cells {{} {} {} {}}
     variable inputSize [llength $input]
+    
+    # Sorting cells
+    variable cells {{} {} {} {}}
     
     # Input index starting from right
     variable index [expr {$inputSize-1}]
@@ -15,11 +18,23 @@ oo::class create Program {
     # Current step
     variable step
     
-    variable newLst
+    # Passed cell
     variable currentCell
+    
+    # Passed value
     variable value
+    
+    # Loop index
+    variable i
+    
+    # New list for every step
+    variable newLst
+    
+    # Variables to swap
     variable toLeft
     variable toRight
+    
+    # Final result
     variable result {}
     
   }
@@ -253,36 +268,54 @@ oo::class create Program {
     
   }
   
+  
+  method phase1 {} {
+  
+    variable step
+    variable inputSize
+  
+    for {set step 1} {$step <= $inputSize} {incr step} { my stepPhase1 }
+    
+  }
+  
+  
+  method phase2 {} {
+  
+    variable step
+    variable inputSize
+    
+    for {set step 1} {$step <= $inputSize-1} {incr step} { my stepPhase2 }
+    
+  }
+  
+  method phase3 {} {
+    
+    variable result
+    variable inputSize
+  
+    while {[llength $result]<$inputSize} { my stepPhase3 }
+    
+  }
+  
   method main {} {
     
     variable input
     variable cells
-    variable inputSize
     variable result
-    variable step
   
     puts "Input: $input"
 
-    # First phase
-    for {set step 1} {$step <= $inputSize} {incr step} {
-      my stepPhase1
-    }
+    my phase1
 
     puts "After first phase"
     puts $cells
     
-    # Second phase
-    for {set step 1} {$step <= $inputSize-1} {incr step} {
-      my stepPhase2
-    }
+    my phase2
 
     puts "After second phase"
     puts $cells
 
-    # Third phase
-    while {[llength $result]<$inputSize} {
-      my stepPhase3
-    }
+    my phase3
 
     puts "After third phase"
     puts $cells

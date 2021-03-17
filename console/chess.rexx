@@ -10,9 +10,13 @@ main: procedure expose plansza.
   
   call nowaPlansza
   
+  call wykonajRuch 1, 1, 1, 4
+  
+  /*
   call przesunFigure 1, 1, 3, 3
   call przesunFigure 3, 3, 5, 5
   call przesunFigure 1, 2, 6, 6
+  */
   
   call pokazPlansze
   
@@ -80,9 +84,7 @@ nowaPlansza: procedure expose plansza.
   return
   
 symbol: procedure
-
   parse arg f
-  
   select
     when f = 'Wieża' then
       return 'W'
@@ -101,7 +103,6 @@ symbol: procedure
     otherwise
       return 'ERROR'
   end
-  
   return
   
 pokazPlansze: procedure expose plansza.
@@ -146,22 +147,135 @@ pokazPlansze: procedure expose plansza.
   
   
 litera: procedure
-
   arg n
-  
   litery.1 = 'A' ; litery.2 = 'B' ; litery.3 = 'C' ; litery.4 = 'D'
   litery.5 = 'E' ; litery.6 = 'F' ; litery.7 = 'G' ; litery.8 = 'H'
-  
   return litery.n
-  
   return
   
 wiersz: procedure
-
   arg n
-  
   return 9 - n
+  return
   
+ustawStartStop: procedure expose start stop
+  arg from, to
+  if from < to then
+    do
+      start = from
+      stop = to
+    end
+  else
+    do
+      start = to
+      stop = from
+    end
+  return
+  
+sprawdzSciezkePoziomo: procedure expose plansza
+  arg start, stop, row
+  clean = 1
+  do i=start+1 to stop-1
+    if plansza.row.i.name \= 'Puste' then
+      do
+        clean = 0
+        leave
+      end
+  end
+  return clean
+  return
+  
+sprawdzSciezkePionowo: procedure expose plansza
+  arg start, stop, col
+  clean = 1
+  do i=start+1 to stop-1
+    if plansza.i.col.name \= 'Puste' then
+      do
+        clean = 0
+        leave
+      end
+  end
+  return clean
+  return
+  
+wykonajRuch: procedure expose plansza.
+
+  arg rowFrom, colFrom, rowTo, colTo
+  
+  figura = plansza.rowFrom.colFrom.name
+  kolor = plansza.rowFrom.colFrom.color
+  
+  skok = 'Wieża nie może przeskakiwać ponad figurami'
+  niebij = 'Nie można bić własnych figur'
+  bij = 'Bicie figury'
+  
+  select
+  
+    when figura = 'Wieża' then
+    
+      /* Ruch w poziomie */
+      if rowFrom = rowTo then
+        do
+          call ustawStartStop colFrom, colTo
+          if sprawdzSciezkePoziomo(start, stop, rowFrom) then
+            do
+              if plansza.rowFrom.stop.name = 'Puste' then
+                call przesunFigure rowFrom, colFrom, rowTo, colTo
+              else if plansza.rowFrom.stop.color = kolor then
+                say niebij
+              else
+                do
+                  say bij
+                  call przesunFigure rowFrom, colFrom, rowTo, colTo
+                end
+            end
+          else
+            say skok
+        end
+      
+      /* Ruch w pionie */
+      else if colFrom = colTo then
+        do
+          call ustawStartStop rowFrom, rowTo
+          if sprawdzSciezkePionowo(start, stop, colFrom) then
+            do
+              if plansza.stop.colFrom.name = 'Puste' then
+                call przesunFigure rowFrom, colFrom, rowTo, colTo
+              else if plansza.stop.colFrom.color = kolor then
+                say niebij
+              else
+                do
+                  say bij
+                  call przesunFigure rowFrom, colFrom, rowTo, colTo
+                end
+            end
+          else
+            say skok
+        end
+      else
+        say 'Nieprawidłowy ruch'
+    
+    when figura = 'Koń' then
+      say 'Skoczek'
+    
+    when figura = 'Goniec' then
+      say 'Laufer'
+      
+    when figura = 'Królowa' then
+      say 'Hetman'
+      
+    when figura = 'Król' then
+      say 'Szach'
+      
+    when figura = 'Pionek' then
+      say 'Pion'
+      
+    otherwise
+      say figura
+      say 'Nieprawidłowa figura'
+  end
+  
+ 
   return
   
 przesunFigure: procedure expose plansza.
@@ -185,9 +299,7 @@ przesunFigure: procedure expose plansza.
   return
   
 odmienFigure: procedure
-
-  parse arg n
-  
+  parse arg n  
   select
     when n = 'Pionek' then
       return 'pionka'
@@ -202,23 +314,16 @@ odmienFigure: procedure
     when n = 'Królowa' then
       return 'królową'
   end
-  
   return
   
-  
+/* Sprawdź czy to płeć męska */
 sprawdzPlec: procedure
-
   parse arg n
-  
-  return n = 'Pionek' | n = 'Goniec' | n = 'Król' | n = 'Koń'
-  
+  return n \= 'Królowa' & n \= 'Wieża'
   return
-  
   
 odmienKolor: procedure
-
   parse arg n, c
-  
   select
     when c = 'C' then
       do
@@ -236,6 +341,5 @@ odmienKolor: procedure
       end
     otherwise
       say 'Error'
-  end
-  
+  end  
   return

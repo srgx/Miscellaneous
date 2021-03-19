@@ -10,7 +10,7 @@ main: procedure expose plansza.
   
   call nowaPlansza
   
-  call wykonajRuch 1, 1, 1, 4
+  call wykonajRuch 1, 4, 3, 6
   
   /*
   call przesunFigure 1, 1, 3, 3
@@ -198,91 +198,219 @@ sprawdzSciezkePionowo: procedure expose plansza
   return clean
   return
   
+ruchWiezy: procedure expose plansza.
+
+  arg rowFrom, colFrom, rowTo, colTo
+
+  skokBlad = 'Wieża nie może skakać nad innymi figurami'
+  kolorBlad = 'Nie można bić własnych figur'
+  wynik = 0
+
+  /* Ruch w poziomie */
+  if rowFrom = rowTo then do
+    call ustawStartStop colFrom, colTo
+    if sprawdzSciezkePoziomo(start, stop, rowFrom) then do
+      if plansza.rowFrom.stop.color \= plansza.rowFrom.colFrom.color then
+        call przesunFigure rowFrom, colFrom, rowTo, colTo
+      else
+        say kolorBlad
+      end
+    else
+      say skokBlad
+    end
+  
+  /* Ruch w pionie */
+  else if colFrom = colTo then do
+      call ustawStartStop rowFrom, rowTo
+      if sprawdzSciezkePionowo(start, stop, colFrom) then do
+        if plansza.rowFrom.stop.color \= plansza.rowFrom.colFrom.color then
+          call przesunFigure rowFrom, colFrom, rowTo, colTo
+        else
+          say kolorBlad
+        end
+      else
+        say skokBlad
+    end
+    
+  else
+    say 'Nieprawidłowy ruch'
+  
+  return wynik
+  return
+  
+ostatniGoniec: procedure expose plansza. error row col
+
+  arg rowFrom, colFrom, rowTo, colTo
+  wynik = 0
+  
+  if error then
+    say 'Goniec nie może skakać nad figurami'
+  else do
+    if row = rowTo & col = colTo then
+      if plansza.rowTo.colTo.color \= plansza.rowFrom.colFrom.color then
+        call przesunFigure rowFrom, colFrom, rowTo, colTo
+      else
+        say 'Nie można bić własnych figur'
+    else
+      say 'Nieprawidłowy ruch'
+  end
+    
+  return wynik
+  return
+  
+  
+ruchGonca: procedure expose plansza.
+
+  arg rowFrom, colFrom, rowTo, colTo
+
+  blad = 'Nieprawidłowy ruch'
+  p = 'Puste'
+  wynik = 0
+  
+  if rowTo > rowFrom then do
+    
+    /* W dół w prawo */
+    if colFrom < colTo then do
+      row = rowFrom + 1 ; col = colFrom + 1 ; error = 0
+      do while row < rowTo & col < colTo
+        if plansza.row.col \= p then do
+          error = 1 ; leave
+        end
+        else do
+          row = row + 1 ; col = col + 1
+        end
+      end
+      wynik = ostatniGoniec(rowFrom, colFrom, rowTo, colTo)
+      end
+    
+    /* W dół w lewo */
+    else if colFrom > colTo then do
+      row = rowFrom + 1 ; col = colFrom - 1 ; error = 0
+      do while row < rowTo & col < colTo
+        if plansza.row.col \= p then do
+          error = 1 ; leave
+          end
+        else do
+          row = row + 1 ; col = col - 1
+        end
+      end
+      wynik = ostatniGoniec(rowFrom, colFrom, rowTo, colTo)
+      end
+      
+    else
+      say blad
+      
+    end
+    
+  else if rowTo < rowFrom then do
+    
+    /* W górę w prawo */
+    if colFrom < colTo then do
+      row = rowFrom - 1 ; col = colFrom + 1 ; error = 0
+      do while row < rowTo & col < colTo
+        if plansza.row.col \= p then do
+          error = 1 ; leave
+          end
+        else do
+          row = row - 1 ; col = col + 1
+        end
+      end
+      wynik = ostatniGoniec(rowFrom, colFrom, rowTo, colTo)
+      end
+    
+    /* W górę w lewo */
+    else if colFrom > colTo then do
+      row = rowFrom - 1 ; col = colFrom - 1 ; error = 0
+      do while row < rowTo & col < colTo
+        if plansza.row.col \= p then do
+          error = 1 ; leave
+          end
+        else do
+          row = row - 1 ; col = col - 1
+        end
+      end
+      wynik = ostatniGoniec(rowFrom, colFrom, rowTo, colTo)
+      end
+      
+    else
+      say blad
+      
+    end
+    
+  else
+    say blad
+
+  return wynik
+  return
+  
+  
+ruchKonia: procedure expose plansza.
+  
+  arg rowFrom, colFrom, rowTo, colTo
+  wynik = 0
+  
+  if ((rowTo = rowFrom - 2 | rowTo = rowFrom + 2) & (colTo = colFrom - 1 | colTo = colFrom + 1)) |,
+     ((rowTo = rowFrom - 1 | rowTo = rowFrom + 1) & (colTo = colFrom - 2 | colTo = colFrom + 2)) then
+     
+    if plansza.rowFrom.colFrom.color \= plansza.rowTo.colTo.color then
+      call przesunFigure rowFrom, colFrom, rowTo, colTo
+    else
+      say 'Nie można bić własnych figur'
+ 
+  else
+    say 'Nieprawidłowy ruch'
+  
+  return wynik
+  return
+  
+ruchKrolowej: procedure expose plansza.
+
+  arg rowFrom, colFrom, rowTo, colTo
+  wynik = 0
+  
+  if ruchWiezy(rowFrom, colFrom, rowTo, colTo) | ruchGonca(rowFrom, colFrom, rowTo, colTo) then
+    wynik = 1
+  
+  return wynik
+  return
+  
+ruchKrola: procedure expose plansza.
+  arg rowFrom, colFrom, rowTo, colTo
+  return
+  
+ruchPionka: procedure expose plansza.
+  arg rowFrom, colFrom, rowTo, colTo
+  return
+  
 wykonajRuch: procedure expose plansza.
 
   arg rowFrom, colFrom, rowTo, colTo
-  
   figura = plansza.rowFrom.colFrom.name
-  kolor = plansza.rowFrom.colFrom.color
-  
-  skok = 'Wieża nie może przeskakiwać ponad figurami'
-  niebij = 'Nie można bić własnych figur'
-  bij = 'Bicie figury'
   
   select
-  
     when figura = 'Wieża' then
-    
-      /* Ruch w poziomie */
-      if rowFrom = rowTo then
-        do
-          call ustawStartStop colFrom, colTo
-          if sprawdzSciezkePoziomo(start, stop, rowFrom) then
-            do
-              if plansza.rowFrom.stop.name = 'Puste' then
-                call przesunFigure rowFrom, colFrom, rowTo, colTo
-              else if plansza.rowFrom.stop.color = kolor then
-                say niebij
-              else
-                do
-                  say bij
-                  call przesunFigure rowFrom, colFrom, rowTo, colTo
-                end
-            end
-          else
-            say skok
-        end
-      
-      /* Ruch w pionie */
-      else if colFrom = colTo then
-        do
-          call ustawStartStop rowFrom, rowTo
-          if sprawdzSciezkePionowo(start, stop, colFrom) then
-            do
-              if plansza.stop.colFrom.name = 'Puste' then
-                call przesunFigure rowFrom, colFrom, rowTo, colTo
-              else if plansza.stop.colFrom.color = kolor then
-                say niebij
-              else
-                do
-                  say bij
-                  call przesunFigure rowFrom, colFrom, rowTo, colTo
-                end
-            end
-          else
-            say skok
-        end
-      else
-        say 'Nieprawidłowy ruch'
-    
+      call ruchWiezy rowFrom, colFrom, rowTo, colTo
     when figura = 'Koń' then
-      say 'Skoczek'
-    
+      call ruchKonia rowFrom, colFrom, rowTo, colTo
     when figura = 'Goniec' then
-      say 'Laufer'
-      
+      call ruchGonca rowFrom, colFrom, rowTo, colTo
     when figura = 'Królowa' then
-      say 'Hetman'
-      
+      call ruchKrolowej rowFrom, colFrom, rowTo, colTo
     when figura = 'Król' then
       say 'Szach'
-      
     when figura = 'Pionek' then
       say 'Pion'
-      
     otherwise
       say figura
       say 'Nieprawidłowa figura'
   end
-  
- 
   return
   
-przesunFigure: procedure expose plansza.
+przesunFigure: procedure expose plansza. wynik
 
   arg rowFrom, colFrom, rowTo, colTo
   
-  n = plansza.rowFrom.colFrom.name ; c = plansza.rowFrom.colFrom.color
+  n = plansza.rowFrom.colFrom.name ; c = plansza.rowFrom.colFrom.color ; wynik = 1
   
   say 'Przesuwam' odmienKolor(n,c) odmienFigure(n),
       'z pozycji' litera(colFrom)'-'wiersz(rowFrom),

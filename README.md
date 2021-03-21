@@ -44,23 +44,33 @@ Various small programs
 
 ## Table of Contents
 
+### Console
+
+* [Bugs](console/bugs.ex)
+* [Chess](console/chess.rexx)
+* [Christmas tree](console/tree.rkt)
+* [Equations](console/root.ndf)
+* [Game of life](console/life.ndf)
+* [Logic programming](console/logic.ex)
+* [Mortgage](console/money.ndf)
+* [Pea](console/pea.tcl)
+* [Scrollbar](console/marker.tcl)
+* [Stack programming](console/stack.ex)
+* [Sudoku](console/sudoku)
+* [Systolic array](console/systolic.tcl)
+* [Tarot](console/tarot.exs)
+* [Travelling salesman](console/travel.ex)
+* [Vectors](console/displacement.tcl)
+
+### Graphics
+
 * [Barnsley fern](graphics/fern.rb)
 * [Bean machine](graphics/bean.tcl)
 * [Breach protocol](graphics/breach.tcl)
 * [Cannonball](graphics/cannon.tcl)
-* [Christmas tree](console/tree.rkt)
-* [Displacement vectors](console/displacement.tcl)
 * [Diffusion-limited aggregation](graphics/dla.tcl)
-* [Equations](console/root.ndf)
-* [Game of life v1](graphics/game.rb)
-* [Game of life v2](console/life.ndf)
+* [Game of life](graphics/game.rb)
 * [Langton's ant](graphics/langton.tcl)
 * [Lightning](graphics/lightning.tcl)
-* [Logic programming](console/logic.ex)
-* [Mortgage](console/money.ndf)
-* [Pea](console/pea.tcl)
 * [Philosophers](graphics/philosophers.tcl)
-* [Scrollbar](console/marker.tcl)
-* [Stack programming](console/stack.ex)
-* [Systolic array](console/systolic.tcl)
-* [Tarot](console/tarot.exs)
+

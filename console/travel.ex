@@ -2,6 +2,7 @@
 -----------------------------------------------------------
 include std/mathcons.e
 include std/sort.e
+include std/search.e
 -----------------------------------------------------------
 constant nCities = 5
 constant distanceRange = 1000
@@ -17,14 +18,88 @@ main()
 procedure main()
 
   createCities(nCities)
-  -- showCities()
+  showCities()
+  nearest()
+  greedy()
   
+end procedure
+
+-----------------------------------------------------------
+
+procedure greedy()
+
+  line()
+  puts(1,"*** GREEDY ***\n")
+  line()
+  
+  -- All edges sorted
+  sequence allEdges = custom_sort(routine_id("byDistance"),collectEdges())
+  
+  puts(1,"Wszystkie połączenia\n")
+  line()
+  showEdges(allEdges)
+  line()
+  
+  -- Collected edges
+  sequence edges = {}
+  
+  for i=1 to length(allEdges) do
+  
+    sequence currentEdge = allEdges[i]
+    integer fromCity = currentEdge[1]
+    integer toCity = currentEdge[2]
+    atom distance = currentEdge[3]
+    
+    -- City has maximum number of neighbours so this edge cant be used
+    if degrees[fromCity] != 2 and degrees[toCity] != 2 then
+    
+      integer cycleS = cycleSize(fromCity, toCity, edges)
+    
+      -- Adding currentEdge will create cycle
+      if cycleS > 0 then
+        if cycleS = nCities then
+          edges = append(edges,currentEdge)
+          degrees[fromCity] += 1
+          degrees[toCity] += 1
+          exit
+        end if
+      else
+        edges = append(edges,currentEdge)
+        degrees[fromCity] += 1
+        degrees[toCity] += 1
+      end if
+      
+    end if
+    
+  end for
+  
+  puts(1,"Wybrane połączenia\n")
+  line()
+  showEdges(edges)
+  line()
+  
+  atom totalDistance = 0
+  for i=1 to length(edges) do
+    totalDistance += edges[i][3]
+  end for
+  
+  printf(1,"Całkowita odległość %f\n",totalDistance)
+  line()
+  
+end procedure
+
+procedure nearest()
+
+  line()
+  puts(1,"*** NEAREST NEIGHBOR ***\n")
+  line()
+
   -- Visit first random city
   integer index = rand(nCities)
+  integer firstCity = index
   visitCity(index)
   
-  printf(1,"Początkowe miasto: %d\n",index)
-  
+  printf(1,"Początkowe miasto: %d\n",firstCity)
   
   -- Visit other cities
   atom totalDistance = 0
@@ -46,36 +121,54 @@ procedure main()
     
   end for
   
+  atom lastStep = distance(firstCity,index)
+  
+  printf(1,"Do miasta %d, ",firstCity)
+  printf(1,"odległość %f\n",lastStep)
+  
+  totalDistance += lastStep
+  
+  line()
   printf(1,"Całkowita odległość: %f\n",totalDistance)
-  
-  ---------------------------------------------------------
-  
-  unvisitAllCities()
-  
-  -- Sorted edges
-  sequence collected = custom_sort(routine_id("byDistance"),collectEdges())
-  
-  print(1,collected)
-  puts(1,"\n")
-  
-  -- Number of connected edges
-  print(1,degrees)
-  puts(1,"\n")
-  
-  for i=1 to length(collected) do
-  
-    sequence currentEdge = collected[i]
-    integer fromCity = currentEdge[1]
-    integer toCity = currentEdge[2]
-    atom distance = currentEdge[3]
-    
-    
-    
-  end for
   
 end procedure
 
------------------------------------------------------------
+function cycleSize(integer fromCity, integer toCity, sequence edges)
+    integer currentNode = toCity
+    sequence visited = { currentNode }
+    integer cycleSize = 0
+    while 1 do
+      integer found = 0
+      for j = 1 to length(edges) do
+        integer a = edges[j][1]
+        integer b = edges[j][2]
+        if a = currentNode and not is_in_list(b,visited) then
+          currentNode = b
+          found = 1
+          visited = append(visited,b)
+          exit
+        elsif b = currentNode and not is_in_list(a,visited) then
+          currentNode = a
+          found = 1
+          visited = append(visited,a)
+          exit
+        end if
+      end for
+      if found then
+        if currentNode = fromCity then
+          cycleSize = length(visited)
+          exit
+        end if
+      else
+        exit
+      end if
+    end while
+    return cycleSize
+end function
+
+procedure line()
+  puts(1,"------------------------------------------\n")
+end procedure
 
 -- City - {visited: bool, x: integer, y: integer}
 procedure createCities(integer numCities)
@@ -90,15 +183,17 @@ procedure createCities(integer numCities)
 end procedure
 
 procedure showCities()
+  
+  line()
+  puts(1,"*** POZYCJE MIAST ***\n")
+  line()
+
   for i=1 to length(cities) do
     printf(1,"Miasto %d: (%d,%d)\n",{i,cityX(cities[i]),cityY(cities[i])})
   end for
 end procedure
 
 function findNearest(integer index)
-  
-  -- City position
-  sequence cityPos = cityPosition(cities[index])
   
   -- Initial distance is positive infinity
   atom minDistance = PINF
@@ -109,8 +204,7 @@ function findNearest(integer index)
     -- Check all unvisited cities
     if not cityVisited(i) then
     
-      sequence otherPos = cityPosition(cities[i])
-      atom cDistance = distance(cityPos,otherPos)
+      atom cDistance = distance(index,i)
       
       -- City is closer than last candidate
       if cDistance < minDistance then
@@ -126,18 +220,23 @@ function findNearest(integer index)
   
 end function
 
+-- Edge - {city1: integer, city2: integer, distance: atom}
 function collectEdges()
   integer le = length(cities)
   sequence edges = {}
   for i=1 to le-1 do
-    sequence p1 = cityPosition(cities[i])
     for j=i+1 to le do
-      sequence p2 = cityPosition(cities[j])
-      edges = append(edges,{i,j,distance(p1,p2)})
+      edges = append(edges,{i,j,distance(i,j)})
     end for
   end for
   return edges
 end function
+
+procedure showEdges(sequence edges)
+  for i=1 to length(edges) do
+    printf(1,"Między miastami %d i %d, %f\n",{edges[i][1],edges[i][2],edges[i][3]})
+  end for
+end procedure
 
 function byDistance(sequence a,sequence b)
   return compare(a[3],b[3])
@@ -145,8 +244,8 @@ end function
 
 -----------------------------------------------------------
 
-function distance(sequence a, sequence b)
-  return sqrt(squared(a[1]-b[1])+squared(a[2]-b[2]))
+function distance(integer a, integer b)
+  return sqrt(squared(cityX(cities[a])-cityX(cities[b]))+squared(cityY(cities[a])-cityY(cities[b])))
 end function
 
 function squared(integer n)
@@ -186,11 +285,5 @@ end function
 function cityPosition(sequence city)
   return {cityX(city),cityY(city)}
 end function
-
-procedure unvisitAllCities()
-  for i=1 to length(cities) do
-    unvisitCity(i)
-  end for
-end procedure
 
 -----------------------------------------------------------

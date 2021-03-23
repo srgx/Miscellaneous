@@ -7,17 +7,22 @@ Copyright:
 // Build & Run: 'dylan-compiler -build sudoku.lid && ./_build/bin/sudoku'
 
 define class <game> (<object>)
+
+  // Array of integers in range 1-9
   slot game-board :: <array>;
+  
   slot game-maps :: <vector>;
   slot game-positions :: <list>, init-value: #();
 end class <game>;
 
+// Create game board and mappings
 define method initialize(g :: <game>, #key)
   next-method();
   g.createBoard;
   g.createMaps;
 end method initialize;
 
+// Show game board
 define method show(g :: <game>)
   line();
   for (row from 0 to 8)
@@ -39,8 +44,9 @@ define method equalVectors(a :: <vector>, b :: <vector>)
     a[0] = b[0] & a[1] = b[1]
 end method equalVectors;
 
-define method puzzle(g :: <game>)
-  let randomInRow = 4;
+// Generate randomInRow indices for every row
+// and remove corresponding values from board
+define method puzzle(g :: <game>, randomInRow :: <integer>)
   for (row from 0 to 8)
     for (i from 1 to randomInRow)
       let col = random(9);
@@ -53,9 +59,15 @@ define method puzzle(g :: <game>)
   end for;
 end method puzzle;
 
+// Set random map
 define method randomMap(g :: <game>)
+
   let s = size(g.game-maps);
-  let mapIndex = random(s + 1);  
+  
+  // Get random map index
+  let mapIndex = random(s + 1);
+  
+  // Value s means no mapping
   if (mapIndex ~= s)
     for (row from 0 to 8)
       for (col from 0 to 8)
@@ -63,8 +75,10 @@ define method randomMap(g :: <game>)
       end for;
     end for;
   end if;
+  
 end method randomMap;
 
+// Try to place number at position i-j
 define method setNumberAt(g :: <game>, n :: <integer>, i :: <integer>, j :: <integer>)
   let position = vector(i,j);
   if (member?(position,g.game-positions, test: equalVectors))
@@ -75,6 +89,7 @@ define method setNumberAt(g :: <game>, n :: <integer>, i :: <integer>, j :: <int
   end if;
 end method setNumberAt;
 
+// Try to remove number from position i-j
 define method unsetNumberAt(g :: <game>, i :: <integer>, j :: <integer>)
   let position = vector(i,j);
   if (member?(position,g.game-positions, test: equalVectors))
@@ -85,18 +100,22 @@ define method unsetNumberAt(g :: <game>, i :: <integer>, j :: <integer>)
   end if;
 end method unsetNumberAt;
 
+// Check if solution is right
 define method checkGame(g :: <game>)
   checkRows(g) & checkCols(g) & checkSquares(g)
 end method checkGame;
 
+// Row - i, Col - j
 define method byRows(g :: <game>, i :: <integer>, j :: <integer>)
   g.game-board[i,j]
 end method byRows;
 
+// Row - j, Col - i
 define method byCols(g :: <game>, i :: <integer>, j :: <integer>)
   g.game-board[j,i]
 end method byCols;
 
+// Check columns and rows with functions byRows or byCols
 define method checkLines(g :: <game>, fn :: <function>)
   let result = #t;
   block (break)
@@ -121,14 +140,17 @@ define method checkLines(g :: <game>, fn :: <function>)
   result
 end method checkLines;
 
+// Check if rows are valid
 define method checkRows(g :: <game>)
   checkLines(g,byRows)
 end method checkRows;
 
+// Check if columns are valid
 define method checkCols(g :: <game>)
   checkLines(g,byCols)
 end method checkCols;
 
+// Check if all 3x3 squares are valid
 define method checkSquares(g)
   let result = #t;
   block (break)
@@ -161,36 +183,49 @@ define method line()
   format-out("-------------------\n");
 end method line;
 
+define method submitSolution(g :: <game>)
+  if (checkGame(g))
+    format-out("Zwycięstwo\n");
+  else
+    format-out("Przegrana\n");
+  end if;
+end method submitSolution;
+
 define function main(name :: <string>, arguments :: <vector>)
 
   format-out("\n\n");
   
+  // ------------------
+  // Initial setup
+  // ------------------
+  
   let g = make(<game>);
   
-  // Ustaw losową planszę
+  // Set random board
   g.randomMap;
   
-  // Usuń liczby
-  g.puzzle;
+  // Remove some numbers
+  puzzle(g,4);
   
-  // Pokaż planszę
+  
+  // ------------------
+  // Gameplay
+  // ------------------
+  
+  // Show board
   g.show;
   
-  for (row from 0 to 8)
-    for (col from 0 to 8)
-      setNumberAt(g,8,row,col);
-    end for
-  end for;
+  // Player tries to set number 8 in upper left corner
+  setNumberAt(g,8,0,0);
   
+  // Player tries to remove number 8 in lower right corner
   unsetNumberAt(g,8,8);
   
+  // Board after player actions
   g.show;
   
-  //if (checkGame(g))
-  //  format-out("Zwycięstwo\n");
-  //else
-  //  format-out("Przegrana\n");
-  //end if;
+  // Player submits solution
+  g.submitSolution;
   
   exit-application(0);
   

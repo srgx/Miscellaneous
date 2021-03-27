@@ -21,6 +21,7 @@ procedure main()
   showCities()
   nearest()
   greedy()
+  insertion()
   
 end procedure
 
@@ -84,6 +85,89 @@ procedure greedy()
   end for
   
   printf(1,"Całkowita odległość %f\n",totalDistance)
+  
+end procedure
+
+procedure insertion()
+
+  line()
+  puts(1,"*** INSERTION ***\n")
+  line()
+  
+  sequence allEdges = collectEdges()
+  
+  -- Find shortest edge
+  sequence shortestEdge = allEdges[1]
+  for i=2 to length(allEdges) do
+    if allEdges[i][3] < shortestEdge[3] then
+      shortestEdge = allEdges[i]
+    end if
+  end for
+  
+  -- Shortest edge is initial subtour
+  sequence subTourEdges = { shortestEdge }
+  
+  -- Visited cities
+  sequence subTourCities = { shortestEdge[1], shortestEdge[2] }
+  
+  -- Visit all cities
+  while length(subTourCities) < nCities do
+  
+    -- Find city closest to subtour
+    integer bestCity = closestToSubtour(subTourCities)
+    
+    atom bestBalance = PINF
+    integer bestEdge = 0
+    sequence edgesToAdd = {}
+    
+    -- Find best edge to replace with connections to new city 
+    for i=1 to length(subTourEdges) do
+    
+      -- Old connection
+      sequence currentEdge = subTourEdges[i]
+      
+      -- New connections
+      atom distanceA = distance(bestCity,currentEdge[1])
+      atom distanceB = distance(bestCity,currentEdge[2])
+      
+      -- Calculate cost of replacing 1 old connection with 2 new
+      atom balance = distanceA + distanceB - currentEdge[3]
+      
+      -- Find best cost and set edges to add
+      if balance < bestBalance then
+        bestBalance = balance
+        bestEdge = i
+        edgesToAdd = {{bestCity,currentEdge[1],distanceA},{bestCity,currentEdge[2],distanceB}}
+      end if
+      
+    end for
+    
+    -- Add visited city
+    subTourCities = append(subTourCities,bestCity)
+    
+    -- Replace old edge with new one
+    subTourEdges[bestEdge] = edgesToAdd[1]
+    
+    -- Add second new edge
+    subTourEdges = append(subTourEdges,edgesToAdd[2])
+    
+  end while
+  
+  -- Add shortest edge
+  subTourEdges = append(subTourEdges,shortestEdge)
+  
+  -- Calculate total distance
+  atom totalDistance = 0
+  for i=1 to length(subTourEdges) do
+    totalDistance += subTourEdges[i][3]
+  end for
+  
+  puts(1,"Wybrane połączenia\n")
+  line()
+  showEdges(subTourEdges)
+  line()
+  
+  printf(1,"Całkowita odległość %f\n",totalDistance)
   line()
   
 end procedure
@@ -132,6 +216,26 @@ procedure nearest()
   printf(1,"Całkowita odległość: %f\n",totalDistance)
   
 end procedure
+
+-----------------------------------------------------------
+
+function closestToSubtour(sequence subTourCities)
+  atom minDistance = PINF
+  integer bestCity = 0
+  for i=1 to length(subTourCities) do
+    integer subtourCity = subTourCities[i]
+    for j=1 to nCities do
+      if not is_in_list(j,subTourCities) then
+        atom cDistance = distance(subtourCity,j)
+        if  cDistance < minDistance then
+          bestCity = j
+          minDistance = cDistance
+        end if
+      end if
+    end for
+  end for
+  return bestCity
+end function
 
 function cycleSize(integer fromCity, integer toCity, sequence edges)
     integer currentNode = toCity

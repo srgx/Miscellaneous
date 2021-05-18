@@ -1,9 +1,10 @@
 /* Euphoria Logic Programming */
 include std/sequence.e
 
-integer pointer = 1
+
+sequence pointers = {}
 sequence facts = {}
-sequence lastQuestion = ""
+sequence questions = {}
 sequence boundVariables = {}
 
 main()
@@ -13,6 +14,8 @@ main()
 procedure main()
 
   createDatabase()
+
+  --rules()
   
   onlyFacts()
   
@@ -24,6 +27,30 @@ procedure main()
   
 end procedure
 
+procedure rules()
+--   puts(1,"RULES\n")
+--   print(1,askQuestion({"fun","X"}))
+--   puts(1,"\nPointers\n")
+--   print(1,pointers)
+--
+--
+--   print(1,nextAnswer())
+--   puts(1,"\nPointers\n")
+--   print(1,pointers)
+--
+--   print(1,nextAnswer())
+--   puts(1,"\nPointers\n")
+--   print(1,pointers)
+
+  print(1,askQuestion({"car","X"}))
+  puts(1,"\nPointers\n")
+  print(1,pointers)
+
+  print(1,nextAnswer())
+
+
+end procedure
+
 procedure onlyFacts()
   
   sequence message = "!!!!ERROR!!!!"
@@ -32,15 +59,15 @@ procedure onlyFacts()
   -----------------------------------------------------------------------------
   
   sequence session = {}
-  
+
   session = append(session,askQuestion({"woman","mia"}))
-  
+
   for i=1 to 2 do
     session = append(session,nextAnswer())
   end for
-  
+
   integer test = equal(session,{{{"true"}},{{"true"}},{{"false"}}})
-  
+
   tests = append(tests,test)
   
   -----------------------------------------------------------------------------
@@ -68,12 +95,12 @@ procedure onlyFacts()
   for i=1 to 4 do
     session = append(session,nextAnswer())
   end for
-    
+
   test = equal(session,
     {{{"First","vincent"},{"Second","mia"}},
-    {{"First","victoria"},{"Second","robin"}},
-    {{"First","amanda"},{"Second","gregg"}},
-    {{"First","joan"},{"Second","shawna"}},{{"false"}}})
+     {{"First","victoria"},{"Second","robin"}},
+     {{"First","amanda"},{"Second","gregg"}},
+     {{"First","joan"},{"Second","shawna"}},{{"false"}}})
   
   tests = append(tests,test)
   
@@ -87,6 +114,17 @@ procedure onlyFacts()
   
   tests = append(tests,test)
   
+  -----------------------------------------------------------------------------
+
+  session = {}
+
+  session = append(session,askQuestion({"likes","X","X"}))
+  session = append(session,nextAnswer())
+
+  test = equal(session,{{{"X","mia"}},{{"false"}}})
+
+  tests = append(tests,test)
+
   -----------------------------------------------------------------------------
   
   showTests(tests)
@@ -144,9 +182,18 @@ procedure showFacts()
   end for
 end procedure
 
+-- Start new search
 function askQuestion(sequence question)
-  lastQuestion = question
-  pointer = 1
+  questions = { question }
+  pointers = { 1 }
+  boundVariables = {}
+  return searchFromPointer()
+end function
+
+-- More questions
+function askQuestionInside(sequence question)
+  questions = append(questions,question)
+  pointers = append(pointers,1)
   return searchFromPointer()
 end function
 
@@ -155,97 +202,151 @@ function nextAnswer()
   return searchFromPointer()
 end function
 
+function isVariable(sequence word)
+  integer w = word[1]
+  return w >= 65 and w < 90
+end function
+
+function checkHead(sequence rule,sequence question)
+  for i=1 to length(question) do
+    sequence r = rule[i]
+    sequence q = question[i]
+    if equal(r,":-") or (not equal(r,q) and not isVariable(r) and not isVariable(q)) then
+      return 0
+    end if
+  end for
+  return equal(rule[length(question)+1],":-")
+end function
+
+function processRule(sequence currentFact, integer i)
+
+  pointers[length(pointers)] = i
+
+  if not checkHead(currentFact,questions[length(questions)]) then
+    return {{"false"}}
+  end if
+
+  sequence variablesToFind = {}
+
+  integer index = 1
+  for j=1 to length(currentFact) do
+    sequence cf = currentFact[j]
+    if equal(":-",cf) then
+      index = j+1
+      exit
+    elsif isVariable(cf) then
+      variablesToFind = append(variablesToFind,cf)
+    end if
+  end for
+
+  sequence questions = slice(currentFact,index,length(currentFact))
+
+  questions = split(questions,{","})
+
+  for j=1 to length(questions) do
+    if equal(askQuestion(questions[j]),{{"false"}}) then
+      pointers = slice(pointers,1,length(pointers)-1)
+    end if
+  end for
+
+  return boundVariables
+
+end function
+
+function processFact(sequence currentFact, integer i)
+
+  -- Get question and fact lenghts
+  integer qlen = length(questions[length(questions)])
+  integer flen = length(currentFact)
+
+  -- If lenghts are the same compare them
+  if qlen = flen then
+
+    -- Go through all words in question
+    for j=1 to qlen do
+
+      -- Get both words
+      sequence currentQuestionWord = questions[length(questions)][j]
+      sequence currentFactWord = currentFact[j]
+
+      -- Variable in question
+      if isVariable(currentQuestionWord) then
+
+        -- Check is variable is already bound
+        integer exists = 0
+        for k=1 to length(boundVariables) do
+
+          if equal(boundVariables[k][1],currentQuestionWord) then
+
+            -- Return false if bound value doesnt match
+            if not equal(boundVariables[k][2],currentFactWord) then
+              return {{"false"}}
+            else
+              -- Save information that variable is bound and exit loop
+              exists = 1
+              exit
+            end if
+          end if
+        end for
+
+        -- Add new bound variable
+        if not exists then
+          boundVariables = append(boundVariables,{currentQuestionWord,currentFactWord})
+        end if
+
+      -- Return false because words dont match
+      elsif not equal(currentQuestionWord,currentFactWord) then
+        return {{"false"}}
+      end if
+
+    end for
+
+    -- Return bound variables or true
+    if not equal(boundVariables,{}) then
+      return boundVariables
+    else
+      return {{"true"}}
+    end if
+
+  -- Lenghts are wrong so return false
+  else
+    return {{"false"}}
+  end if
+
+end function
+
 function searchFromPointer()
 
-  integer qlen = length(lastQuestion)
+  sequence result
 
-  for i=pointer to length(facts) do
-    
+  -- Search database starting from pointer
+  for i=pointers[length(pointers)] to length(facts) do
+
+    -- Increment pointer value
+    pointers[length(pointers)] += 1
+
+    -- Get i'th fact or rule from database
     sequence currentFact = facts[i]
-    integer flen = length(currentFact)
-    
+
+    -- Match last question with rule or fact
     if isRule(currentFact) then
-      
-      integer index = 1
-      for j=1 to length(currentFact) do
-        if equal(":-",currentFact[j]) then
-          index = j+1
-          exit
-        end if
-      end for
-      
-      -- Lista pytań rozdzielonych przecinkami
-      sequence questions = slice(currentFact,index,length(currentFact))
-      
-      questions = split(questions,{","})
-      
-      -- Sprawdź po kolei wszystkie warunki
-      -- Jeśli wszystkie są spełnione zwróć
-      -- odpowiedni wynik
-      puts(1,"Warunki do spełnienia:\n")
-      for j=1 to length(questions) do
-      
-        sequence condition = questions[j]
-        print(1,condition)
-        
-        askQuestion(condition)
-        
-      end for
-      puts(1,"\n--------\n")
-      
+      result = processRule(currentFact,i)
     else
-      
-      if qlen = flen then
-    
-        integer error = 0
-        
-        for j=1 to qlen do
-        
-          sequence currentQuestionWord = lastQuestion[j]
-          sequence currentFactWord = currentFact[j]
-          integer firstLetter = currentQuestionWord[1]
-          
-          if firstLetter >= 65 and firstLetter < 90 then
-            
-            for k=1 to length(boundVariables) do
-              if equal(boundVariables[k][1],currentQuestionWord) then
-                error = 1
-                exit
-              end if
-            end for
-            
-            if error then
-              exit
-            else
-              boundVariables = append(boundVariables,{currentQuestionWord,currentFactWord})
-            end if
-            
-          elsif not equal(currentQuestionWord,currentFactWord) then
-            error = 1
-            exit
-          end if
-          
-        end for
-        
-        if error then
-          boundVariables = {}
-        else
-          pointer = i + 1
-          if not equal(boundVariables,{}) then
-            return boundVariables
-          else
-            return {{"true"}}
-          end if
-        end if
-      
+
+      -- Go to next iteration if result is false
+      -- Otherwise return answer
+      result = processFact(currentFact,i)
+      if not equal(result,{{"false"}}) then
+        return result
       end if
-      
+
     end if
-    
+
   end for
-  
+
+  -- No more answers
   return {{"false"}}
-  
+
 end function
 
 procedure createDatabase()
@@ -261,6 +362,8 @@ procedure createDatabase()
   addFact({"loves","victoria","robin"})
   addFact({"loves","amanda","gregg"})
   addFact({"loves","joan","shawna"})
+
+  addFact({"likes","mia","mia"})
   
   addFact({"car","vw_beatle"})
   addFact({"car","ford_escort"})
@@ -273,6 +376,7 @@ procedure createDatabase()
   addFact({"human","socrates"})
   
   --addFact({"fun","X",":-","red","X",",","car","X"})
+
   --addFact({"fun","X",":-","blue","X",",","bike","X"})
   --addFact({"mortal","X",":-","human","X"})
   

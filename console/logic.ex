@@ -15,8 +15,8 @@ procedure main()
 
   createDatabase()
 
-  --rules()
-  
+  rules()
+
   onlyFacts()
   
   --firstSession()
@@ -28,32 +28,23 @@ procedure main()
 end procedure
 
 procedure rules()
---   puts(1,"RULES\n")
---   print(1,askQuestion({"fun","X"}))
---   puts(1,"\nPointers\n")
---   print(1,pointers)
---
---
---   print(1,nextAnswer())
---   puts(1,"\nPointers\n")
---   print(1,pointers)
---
---   print(1,nextAnswer())
---   puts(1,"\nPointers\n")
---   print(1,pointers)
 
-  print(1,askQuestion({"car","X"}))
-  puts(1,"\nPointers\n")
-  print(1,pointers)
+  sequence tests = {}
+  sequence session = {}
 
-  print(1,nextAnswer())
+  session = append(session,askQuestion({"f","X"}))
+  session = append(session,nextAnswer())
 
+  integer test = equal(session,{{{"X","ola"}},{{"false"}}})
+
+  tests = append(tests,test)
+
+  showTests(tests)
 
 end procedure
 
 procedure onlyFacts()
   
-  sequence message = "!!!!ERROR!!!!"
   sequence tests = {}
   
   -----------------------------------------------------------------------------
@@ -69,7 +60,7 @@ procedure onlyFacts()
   integer test = equal(session,{{{"true"}},{{"true"}},{{"false"}}})
 
   tests = append(tests,test)
-  
+
   -----------------------------------------------------------------------------
   
   session = {}
@@ -85,7 +76,7 @@ procedure onlyFacts()
             
   
   tests = append(tests,test)
-  
+
   -----------------------------------------------------------------------------
   
   session = {}
@@ -197,9 +188,32 @@ function askQuestionInside(sequence question)
   return searchFromPointer()
 end function
 
+function resatisfy(sequence rule)
+  sequence qvs = getQuestionsAndVars(rule)
+  sequence questions = qvs[1]
+  sequence variables = qvs[2]
+  integer ruleIndex = length(questions)
+  return processLocalQuestions(questions,variables,ruleIndex,1)
+end function
+
 function nextAnswer()
-  boundVariables = {}
-  return searchFromPointer()
+
+  if isRule(facts[pointers[1]]) then
+    sequence result = resatisfy(facts[pointers[1]])
+    if equal(result,{{"false"}}) then
+      pointers = { pointers[1] + 1 }
+    else
+      return result
+    end if
+  else
+    boundVariables = {}
+    return searchFromPointer()
+  end if
+
+  puts(1,"No more answers\n")
+
+  return {{"false"}}
+
 end function
 
 function isVariable(sequence word)
@@ -218,16 +232,57 @@ function checkHead(sequence rule,sequence question)
   return equal(rule[length(question)+1],":-")
 end function
 
-function processRule(sequence currentFact, integer i)
+function getBoundValue(sequence toFind)
+  sequence result = {}
+  for i=1 to length(boundVariables) do
+    if equal(boundVariables[i][1],toFind) then
+      result = boundVariables[i]
+      exit
+    end if
+  end for
+  return result
+end function
 
-  pointers[length(pointers)] = i
+function processLocalQuestions(sequence localQuestions,sequence variablesToFind, integer ruleIndex, integer backtracking)
 
-  if not checkHead(currentFact,questions[length(questions)]) then
-    return {{"false"}}
-  end if
+  sequence result = {}
+  sequence temp = {}
+
+  while 1 do
+
+    if backtracking then
+      temp = searchFromPointer()
+    else
+      temp = askQuestionInside(localQuestions[ruleIndex])
+    end if
+
+    if equal(temp,{{"false"}}) then
+      pointers = removeLast(pointers)
+      questions = removeLast(questions)
+      boundVariables = removeLast(boundVariables) -- Which variable should be removed?
+      ruleIndex -= 1
+      backtracking = 1
+    else
+      ruleIndex += 1
+      backtracking = 0
+    end if
+
+    if ruleIndex = 0 then
+      return {{"false"}}
+    elsif ruleIndex = length(localQuestions)+1 then
+      for j=1 to length(variablesToFind) do
+        result = append(result,getBoundValue(variablesToFind[j]))
+      end for
+      return result
+    end if
+
+  end while
+
+end function
+
+function getQuestionsAndVars(sequence currentFact)
 
   sequence variablesToFind = {}
-
   integer index = 1
   for j=1 to length(currentFact) do
     sequence cf = currentFact[j]
@@ -239,21 +294,31 @@ function processRule(sequence currentFact, integer i)
     end if
   end for
 
-  sequence questions = slice(currentFact,index,length(currentFact))
+  sequence localQuestions = slice(currentFact,index,length(currentFact))
+  localQuestions = split(localQuestions,{","})
 
-  questions = split(questions,{","})
-
-  for j=1 to length(questions) do
-    if equal(askQuestion(questions[j]),{{"false"}}) then
-      pointers = slice(pointers,1,length(pointers)-1)
-    end if
-  end for
-
-  return boundVariables
+  return { localQuestions, variablesToFind }
 
 end function
 
-function processFact(sequence currentFact, integer i)
+function processRule(sequence currentFact)
+
+  -- Check if rule head matches
+  if not checkHead(currentFact,questions[length(questions)]) then
+    return {{"false"}}
+  end if
+
+  sequence questionsAndVars = getQuestionsAndVars(currentFact)
+
+  -- Go through all questions
+  return processLocalQuestions(questionsAndVars[1],questionsAndVars[2],1,0)
+
+end function
+
+function processFact(sequence currentFact)
+
+  -- Increment pointer value
+  pointers[length(pointers)] += 1
 
   -- Get question and fact lenghts
   integer qlen = length(questions[length(questions)])
@@ -322,20 +387,22 @@ function searchFromPointer()
   -- Search database starting from pointer
   for i=pointers[length(pointers)] to length(facts) do
 
-    -- Increment pointer value
-    pointers[length(pointers)] += 1
-
     -- Get i'th fact or rule from database
     sequence currentFact = facts[i]
 
     -- Match last question with rule or fact
     if isRule(currentFact) then
-      result = processRule(currentFact,i)
+
+      result = processRule(currentFact)
+      if not equal(result,{{"false"}}) then
+        return result
+      end if
+
     else
 
       -- Go to next iteration if result is false
       -- Otherwise return answer
-      result = processFact(currentFact,i)
+      result = processFact(currentFact)
       if not equal(result,{{"false"}}) then
         return result
       end if
@@ -344,7 +411,6 @@ function searchFromPointer()
 
   end for
 
-  -- No more answers
   return {{"false"}}
 
 end function
@@ -357,28 +423,34 @@ procedure createDatabase()
   addFact({"playsAirGuitar","jody"})
   addFact({"party"})
   addFact({"woman","mia"})
-  
+
   addFact({"loves","vincent","mia"})
   addFact({"loves","victoria","robin"})
   addFact({"loves","amanda","gregg"})
   addFact({"loves","joan","shawna"})
 
   addFact({"likes","mia","mia"})
-  
+
   addFact({"car","vw_beatle"})
   addFact({"car","ford_escort"})
   addFact({"bike","harley_davidson"})
   addFact({"red","vw_beatle"})
   addFact({"red","ford_escort"})
   addFact({"blue","harley_davidson"})
-  
+
   addFact({"mortal","plato"})
   addFact({"human","socrates"})
-  
-  --addFact({"fun","X",":-","red","X",",","car","X"})
 
-  --addFact({"fun","X",":-","blue","X",",","bike","X"})
-  --addFact({"mortal","X",":-","human","X"})
+--   addFact({"fun","X",":-","red","X",",","car","X"})
+--
+--   addFact({"fun","X",":-","blue","X",",","bike","X"})
+--   addFact({"mortal","X",":-","human","X"})
+
+  addFact({"c","ala"})
+  addFact({"r","ala"})
+  addFact({"c","ola"})
+  addFact({"m","ola"})
+  addFact({"f","X",":-","c","X",",","m","X"})
   
 end procedure
 
@@ -399,6 +471,14 @@ end procedure
 procedure line()
   puts(1,"-----------------\n")
 end procedure
+
+function removeLast(sequence lst)
+  if length(lst) = 1 then
+    return {}
+  else
+    return slice(lst,1,length(lst)-1)
+  end if
+end function
 
 function isRule(sequence w)
   for i=1 to length(w) do

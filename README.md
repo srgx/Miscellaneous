@@ -42,6 +42,10 @@ Various small programs
 
 ![Philosophers](https://i.imgur.com/nC0A01A.png)
 
+* Alu
+
+![Alu](https://i.imgur.com/DrS3zKy.png)
+
 ## Table of Contents
 
 ### Console
@@ -64,6 +68,7 @@ Various small programs
 
 ### Graphics
 
+* [Alu](graphics/alu.tcl)
 * [Barnsley fern](graphics/fern.rb)
 * [Bean machine](graphics/bean.tcl)
 * [Breach protocol](graphics/breach.tcl)

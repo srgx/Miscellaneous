@@ -42,9 +42,9 @@ Various small programs
 
 ![Philosophers](https://i.imgur.com/nC0A01A.png)
 
-* Alu
+* ALU
 
-![Alu](https://i.imgur.com/DrS3zKy.png)
+![ALU](https://i.imgur.com/v2ymrhS.png)
 
 ## Table of Contents
 
@@ -68,7 +68,7 @@ Various small programs
 
 ### Graphics
 
-* [Alu](graphics/alu.tcl)
+* [Arithmetic logic unit](graphics/alu.tcl)
 * [Barnsley fern](graphics/fern.rb)
 * [Bean machine](graphics/bean.tcl)
 * [Breach protocol](graphics/breach.tcl)

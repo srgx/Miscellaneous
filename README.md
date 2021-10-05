@@ -55,6 +55,7 @@ Various small programs
 * [Christmas tree](console/tree.rkt)
 * [Equations](console/root.ndf)
 * [Game of life](console/life.ndf)
+* [Hydrocarbons](console/hydrocarbons.cs)
 * [Mortgage](console/money.ndf)
 * [Pea](console/pea.tcl)
 * [Scrollbar](console/marker.tcl)

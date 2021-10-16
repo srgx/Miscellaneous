@@ -1,4 +1,4 @@
-
+#!/usr/bin/env ruby
 
 $database = []
 
@@ -48,5 +48,3 @@ end
 
 c = Context.new
 puts c.askQuestion(["woman","mia"])
-
-

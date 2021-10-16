@@ -56,6 +56,7 @@ Various small programs
 * [Equations](console/root.ndf)
 * [Game of life](console/life.ndf)
 * [Hydrocarbons](console/hydrocarbons.cs)
+* [Logic programming](console/logic.rb)
 * [Mortgage](console/money.ndf)
 * [Pea](console/pea.tcl)
 * [Scrollbar](console/marker.tcl)

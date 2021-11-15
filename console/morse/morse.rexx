@@ -36,7 +36,7 @@ do forever
     end
 end
 
-return 0
+exit 0
 
 translateLetters: procedure expose lettersToCodesList.
   arg letters

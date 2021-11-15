@@ -1,4 +1,4 @@
-# Misc
+# Miscellaneous
 
 Various small programs
 

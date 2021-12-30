@@ -53,6 +53,7 @@ Various small programs
 * [Bugs](console/bugs.ex)
 * [Chess](console/chess.rexx)
 * [Christmas tree](console/tree.rkt)
+* [Convert](console/convert.tcl)
 * [Elements](console/elements)
 * [Equations](console/root.ndf)
 * [Game of life](console/life.ndf)

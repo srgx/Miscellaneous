@@ -57,6 +57,7 @@ Various small programs
 * [Elements](console/elements)
 * [Equations](console/root.ndf)
 * [Game of life](console/life.ndf)
+* [Half-life](console/half_life.tcl)
 * [Hydrocarbons](console/hydrocarbons.cs)
 * [Logic programming](console/logic.rb)
 * [Morse code](console/morse)

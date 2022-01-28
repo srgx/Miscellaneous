@@ -1,20 +1,43 @@
+
+% Money ;
+
+% ---------------------------------------------------------------------------------- ;
+
+% Debt ;
 Initial_amount := 100000 ;
 
-Months := 120 ;
+% Time period (10 years) ;
+Months := 10 * 12 ;
 
-I := 5 / 1200 + 1 ;
+% Monthly debt growth (1.00417) ;
+I := 5 / 100 / 12 + 1 ;
 
-Ipm := I power Months ;
-
-Rt := Ipm - 1 / (I - 1) ;
-
+% Monthly payments ;
 Mn1 := 1060.66 ; Mn2 := 1000 ;
 
+% ---------------------------------------------------------------------------------- ;
+
+% Debt after 'Months' months ;
+Ipm := I power Months ;
+Rt := Ipm - 1 / (I - 1) ;
 D1 := Ipm * Initial_amount - (Mn1 * Rt) ;
 D2 := Ipm * Initial_amount - (Mn2 * Rt) ;
 
-write D1 ; write D2 ;
+% String constant ;
+Mps := 'Monthly payment ' ;
 
+% Display results ;
+write (link 'Debt after ' (string Months) ' months:') ;
+write (link Mps (string Mn1) ': ' (string D1)) ;
+write (link Mps (string Mn2) ': ' (string D2)) ;
+
+% ---------------------------------------------------------------------------------- ;
+
+% Calculate monthly debt payment ;
 Mp := Initial_amount * Ipm * (I - 1) / (Ipm - 1) ;
 
-write Mp ;
+% Show monthly payment ;
+write (link 'Monthly debt payment for ' (string Months) ' months: ' (string Mp)) ;
+
+% ---------------------------------------------------------------------------------- ;
+

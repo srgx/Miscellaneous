@@ -59,7 +59,7 @@ Various small programs
 * [Game of life](console/life.ndf)
 * [Half-life](console/half_life.tcl)
 * [Hydrocarbons](console/hydrocarbons.cs)
-* [Logic programming](console/logic.rb)
+* [Logic programming](console/logic)
 * [Morse code](console/morse)
 * [Mortgage](console/money.ndf)
 * [Pea](console/pea.tcl)

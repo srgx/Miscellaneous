@@ -57,6 +57,7 @@ Various small programs
 * [Convert](console/convert.tcl)
 * [Elements](console/elements)
 * [Equations](console/root.ndf)
+* [Estimate Pi](console/pi.tcl)
 * [Game of life](console/life.ndf)
 * [Half-life](console/half_life.tcl)
 * [Hydrocarbons](console/hydrocarbons.cs)

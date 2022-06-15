@@ -20,7 +20,7 @@ Various small programs
 
 * Langton's Ant
 
-![Ant](https://i.imgur.com/qxY8m2j.png)
+![Ant](https://i.imgur.com/1TpDIJ3.gif)
 
 * Cannonball
 
@@ -28,11 +28,11 @@ Various small programs
 
 * Bean Machine
 
-![Bean](https://i.imgur.com/sBXk9PA.png)
+![Bean](https://i.imgur.com/ONFidyS.gif)
 
 * Lightning
 
-![Light](https://i.imgur.com/gI39cRa.png)
+![Light](https://i.imgur.com/nljCrkI.gif)
 
 * DLA
 
@@ -40,7 +40,7 @@ Various small programs
 
 * Philosophers
 
-![Philosophers](https://i.imgur.com/nC0A01A.png)
+![Philosophers](https://i.imgur.com/Ixz2Tn6.gif)
 
 * ALU
 

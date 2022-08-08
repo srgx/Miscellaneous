@@ -46,6 +46,10 @@ Various small programs
 
 ![ALU](https://i.imgur.com/v2ymrhS.png)
 
+* SSD
+
+![SSD](https://i.imgur.com/1iaMFzh.png)
+
 ## Table of Contents
 
 ### Console
@@ -88,4 +92,5 @@ Various small programs
 * [Langton's ant](graphics/langton.tcl)
 * [Lightning](graphics/lightning.tcl)
 * [Philosophers](graphics/philosophers.tcl)
+* [SSD](graphics/ssd.tcl)
 

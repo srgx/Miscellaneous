@@ -1,0 +1,114 @@
+link numbers
+
+# Box Plot
+
+procedure drawBoxPlot(w,pData)
+
+  # Position & dimensions
+  width := 700 ; height := 100
+  leftX := 50 ; rightX := leftX + width
+  topY := 50 ; botY := topY + height
+  midY := topY + height / 2
+
+  xs := getXs(leftX,width,pData)
+  leftBox := xs[1] ; rightBox := xs[2] ; medianX := xs[3]
+
+  # Left
+  DrawLine(w,leftX,topY,leftX,botY)
+  DrawLine(w,leftX,midY,leftBox,midY)
+
+  # Right
+  DrawLine(w,rightBox,midY,rightX,midY)
+  DrawLine(w,rightX,topY,rightX,botY)
+
+  # Median & Box
+  DrawLine(w,medianX,topY,medianX,botY)
+  DrawRectangle(w,leftBox,topY,rightBox-leftBox,height)
+
+end
+
+procedure getXs(leftX,width,pData)
+  xs := list(3) ; ks := ["25","75","median"]
+  every i := 1 to 3 do
+    xs[i] := posX(leftX,width,pData,ks[i])
+  return xs
+end
+
+procedure calculate(data)
+
+  pData := table() ; data := sort(data)
+
+  pData["min"] := min(data)
+  pData["max"] := max(data)
+  pData["mean"] := mean(data)
+
+  pData["25"] := percentile(data,25)
+  pData["median"] := median(data)
+  pData["75"] := percentile(data,75)
+
+  pData["range"] := pData["max"] - pData["min"]
+
+  return pData
+
+end
+
+procedure showData(pData)
+
+  write("Min: ", pData["min"])
+  write("Max: ", pData["max"])
+  write("Mean:", pData["mean"])
+
+  write("Q1: ", pData["25"])
+  write("Median: ", pData["median"])
+  write("Q3: ", pData["75"])
+
+  write("Range: ", pData["range"])
+
+end
+
+procedure posX(left,width,pData,s)
+  return left + (pData[s] - pData["min"]) * width / pData["range"]
+end
+
+procedure mean(L)
+   m := 0 ; every m +:= !L
+   return div(m,*L)
+end
+
+procedure median(sortedData)
+  return(percentile(sortedData,50))
+end
+
+procedure percentile(sortedData,n)
+  index := real(n) / 100 * (*sortedData + 1)
+  f := floor(index)
+  return if f = index then
+    sortedData[index] else
+    amean(sortedData[f],sortedData[ceil(index)])
+end
+
+procedure main()
+
+  w := open("Box Plot", "g")
+
+  # Create data
+  data := list(100)
+  every i := 1 to 100 do
+    data[i] := ?1e3
+
+  # Perform calculations
+  pData := calculate(data)
+
+  # Display data
+  showData(pData)
+
+  # Draw box plot
+  drawBoxPlot(w,pData)
+  WSync()
+
+  delay(5e3)
+
+  close(w)
+
+end
+

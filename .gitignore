@@ -1,3 +1,5 @@
 *.err
+*.pdf
 _build
+a.out
 auto.nlg

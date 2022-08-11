@@ -50,6 +50,14 @@ Various small programs
 
 ![SSD](https://i.imgur.com/1iaMFzh.png)
 
+* Box plot
+
+![Box plot](https://i.imgur.com/Ybsuz7L.png)
+
+* Histogram
+
+![Histogram](https://i.imgur.com/0jl5T1C.png)
+
 ## Table of Contents
 
 ### Console
@@ -70,6 +78,7 @@ Various small programs
 * [Morse code](console/morse)
 * [Mortgage](console/money.ndf)
 * [Pea](console/pea.tcl)
+* [Professor & Rain](console/professor.r)
 * [Scrollbar](console/marker.tcl)
 * [Shell](console/shell.tcl)
 * [Stack programming](console/stack.ex)
@@ -85,10 +94,12 @@ Various small programs
 * [Arithmetic logic unit](graphics/alu.tcl)
 * [Barnsley fern](graphics/fern.rb)
 * [Bean machine](graphics/bean.tcl)
+* [Box plot](graphics/box.icn)
 * [Breach protocol](graphics/breach.tcl)
 * [Cannonball](graphics/cannon.tcl)
 * [Diffusion-limited aggregation](graphics/dla.tcl)
 * [Game of life](graphics/game.rb)
+* [Histogram](graphics/histogram.icn)
 * [Langton's ant](graphics/langton.tcl)
 * [Lightning](graphics/lightning.tcl)
 * [Philosophers](graphics/philosophers.tcl)

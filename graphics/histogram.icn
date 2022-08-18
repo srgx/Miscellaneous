@@ -2,32 +2,55 @@ link numbers
 
 # Histogram
 
-procedure getProperties(d,s)
+# ----------------------------------------------------------------
 
-  t := table()
+record histogramData(range,bars,width,limits,frequencies)
 
-  h := 0.5 ; mi := min(d) - h ; ma := max(d) + h
+# ----------------------------------------------------------------
 
-  t["range"] := ma - mi
-  t["bars"] := round(sqrt(s))
-  t["width"] := real(t["range"])/t["bars"]
-  t["limits"] := getLimits(t["bars"],mi,t["width"])
-  t["frequencies"] := getFrequencies(t["bars"],t["limits"],d)
+procedure getHistogramData(d)
 
-  return t
+  (hd := histogramData()).frequencies :=
+    getFrequencies(
+      hd.bars,
+      hd.limits :=
+        getLimits(
+          hd.bars,mi,
+          (hd.width :=
+             real(hd.range :=
+                    max(d) +
+                    (h := 0.5) -
+                    (mi := min(d) - h)) /
+             (hd.bars := round(sqrt(*d))))),
+      d)
+
+  return hd
 
 end
 
-procedure createHistogram(bars,frequencies,w)
+procedure drawHistogram(h,w)
 
   # Generate histogram
   x := 10 ; d := 55
-  every i := 1 to bars do {
-    DrawRectangle(w,x,10,50,frequencies[i]*12)
+  every i := 1 to h.bars do {
+    DrawRectangle(w,x,10,50,h.frequencies[i]*12)
     x +:= d
   }
 
 end
+
+procedure showData(h)
+
+  write("Range: ",h.range)
+  write("Width: ",h.width)
+  write("Bars: ",h.bars)
+
+  writes("Limits: ") ; every writes(!h.limits," ") ; write()
+  writes("Frequencies: ") ; every writes(!h.frequencies," ") ; write()
+
+end
+
+# ----------------------------------------------------------------
 
 procedure createSortedData(s)
 
@@ -54,26 +77,21 @@ procedure getFrequencies(bars,limits,d)
 
   # Calculate frequencies
   frequencies := list(bars,0) ; fIndex := 1
-  every v := !d do {
-    if v <= limits[fIndex+1] then
-      frequencies[fIndex] +:= 1
-    else
-      fIndex +:= 1
-  }
+  every v := !d do
+    (if v <= limits[fIndex+1] then
+      frequencies[fIndex] else
+      fIndex)
+    +:= 1
 
   return frequencies
 
 end
 
-procedure showData(range,width,bars,limits)
-  write("Range: ",range) ; write("Width: ",width)
-  write("Bars: ",bars) ; writes("Limits: ")
-  every writes(!limits," ") ; write()
-end
+# ----------------------------------------------------------------
 
 procedure main()
 
-  w := open("Box Plot", "g")
+  w := open("Histogram", "g")
 
   # Number of data
   s := 100
@@ -81,19 +99,21 @@ procedure main()
   # Data
   d := createSortedData(s)
 
-  # Calculate properties
-  t := getProperties(d,s)
+  # Calculate histogram properties
+  h := getHistogramData(d)
 
-  # Draw histogram
-  createHistogram(t["bars"],t["frequencies"],w)
+  # Display histogram
+  drawHistogram(h,w)
   WSync()
 
   # Display data on command line
-  showData(t["range"],t["width"],t["bars"],t["limits"])
+  showData(h)
 
   delay(5e3)
 
   close(w)
 
 end
+
+# ----------------------------------------------------------------
 

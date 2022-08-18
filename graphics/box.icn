@@ -2,6 +2,12 @@ link numbers
 
 # Box Plot
 
+# ----------------------------------------------------------------
+
+record boxData(min,max,mean,q1,median,q3,range)
+
+# ----------------------------------------------------------------
+
 procedure drawBoxPlot(w,pData)
 
   # Position & dimensions
@@ -27,47 +33,69 @@ procedure drawBoxPlot(w,pData)
 
 end
 
-procedure getXs(leftX,width,pData)
-  xs := list(3) ; ks := ["25","75","median"]
-  every i := 1 to 3 do
-    xs[i] := posX(leftX,width,pData,ks[i])
-  return xs
+procedure posX(left,width,pData,s)
+  return left + (pData[s] - pData.min) * width / pData.range
 end
 
-procedure calculate(data)
+procedure getXs(leftX,width,pData)
 
-  pData := table() ; data := sort(data)
+  xs := list(3) ; ks := ["q1","q3","median"]
 
-  pData["min"] := min(data)
-  pData["max"] := max(data)
-  pData["mean"] := mean(data)
+  every i := 1 to 3 do
+    xs[i] := posX(leftX,width,pData,ks[i])
 
-  pData["25"] := percentile(data,25)
-  pData["median"] := median(data)
-  pData["75"] := percentile(data,75)
-
-  pData["range"] := pData["max"] - pData["min"]
-
-  return pData
+  return xs
 
 end
 
 procedure showData(pData)
 
-  write("Min: ", pData["min"])
-  write("Max: ", pData["max"])
-  write("Mean:", pData["mean"])
+  write("Min: ", pData.min)
+  write("Max: ", pData.max)
+  write("Mean:", pData.mean)
 
-  write("Q1: ", pData["25"])
-  write("Median: ", pData["median"])
-  write("Q3: ", pData["75"])
+  write("Q1: ", pData.q1)
+  write("Median: ", pData.median)
+  write("Q3: ", pData.q3)
 
-  write("Range: ", pData["range"])
+  write("Range: ", pData.range)
 
 end
 
-procedure posX(left,width,pData,s)
-  return left + (pData[s] - pData["min"]) * width / pData["range"]
+# ----------------------------------------------------------------
+
+procedure median(sortedData)
+  return(percentile(sortedData,50))
+end
+
+procedure percentile(sortedData,n)
+
+  f := floor(index := real(n) / 100 * (*sortedData + 1))
+
+  return if f = index then
+    sortedData[index] else
+    amean(sortedData[f],sortedData[ceil(index)])
+
+end
+
+# ----------------------------------------------------------------
+
+procedure calculate(data)
+
+  pData := boxData() ; data := sort(data)
+
+  pData.min := min(data)
+  pData.max := max(data)
+  pData.mean := mean(data)
+
+  pData.q1 := percentile(data,25)
+  pData.median := median(data)
+  pData.q3 := percentile(data,75)
+
+  pData.range := pData.max - pData.min
+
+  return pData
+
 end
 
 procedure mean(L)
@@ -75,17 +103,7 @@ procedure mean(L)
    return div(m,*L)
 end
 
-procedure median(sortedData)
-  return(percentile(sortedData,50))
-end
-
-procedure percentile(sortedData,n)
-  index := real(n) / 100 * (*sortedData + 1)
-  f := floor(index)
-  return if f = index then
-    sortedData[index] else
-    amean(sortedData[f],sortedData[ceil(index)])
-end
+# ----------------------------------------------------------------
 
 procedure main()
 
@@ -111,4 +129,6 @@ procedure main()
   close(w)
 
 end
+
+# ----------------------------------------------------------------
 

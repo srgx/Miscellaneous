@@ -10,30 +10,26 @@ record histogramData(range,bars,width,limits,frequencies)
 
 procedure getHistogramData(d)
 
-  (hd := histogramData()).frequencies :=
+  return {
+    (hd := histogramData()).frequencies :=
     getFrequencies(
-      hd.bars,
+      hd.bars := round(sqrt(*d)),
       hd.limits :=
         getLimits(
-          hd.bars,mi,
-          (hd.width :=
-             real(hd.range :=
-                    max(d) +
-                    (h := 0.5) -
-                    (mi := min(d) - h)) /
-             (hd.bars := round(sqrt(*d))))),
-      d)
-
-  return hd
+          hd.bars, mi := d[1] - (h := 0.5),
+          hd.width :=
+             div(hd.range := d[*d] + h - mi, hd.bars)),
+      d); hd
+  }
 
 end
 
-procedure drawHistogram(h,w)
+procedure drawHistogram(h, w)
 
   # Generate histogram
-  x := 10 ; d := 55
+  x := 10 ; d := 55; scale := 12; y := 10; rWidth := 50
   every i := 1 to h.bars do {
-    DrawRectangle(w,x,10,50,h.frequencies[i]*12)
+    DrawRectangle(w, x, y, rWidth, h.frequencies[i] * scale)
     x +:= d
   }
 
@@ -41,12 +37,12 @@ end
 
 procedure showData(h)
 
-  write("Range: ",h.range)
-  write("Width: ",h.width)
-  write("Bars: ",h.bars)
+  write("Range: ", h.range, n := "\n",
+        "Width: ", h.width, n,
+        "Bars: ", h.bars)
 
-  writes("Limits: ") ; every writes(!h.limits," ") ; write()
-  writes("Frequencies: ") ; every writes(!h.frequencies," ") ; write()
+  writes("Limits: ") ; every writes(!h.limits, s := " ") ; write()
+  writes("Frequencies: ") ; every writes(!h.frequencies, s) ; write()
 
 end
 
@@ -55,35 +51,32 @@ end
 procedure createSortedData(s)
 
   # Generate data
-  d := list(s)
-  every i := 1 to s do d[i] := ?100
-
-  return sort(d)
+  return sort({ d := list(s); every i := 1 to s do d[i] := ?100; d })
 
 end
 
-procedure getLimits(bars,mi,width)
+procedure getLimits(bars, mi, width)
 
   # Calculate limits
-  limits := list(bars+1) ; limits[1] := mi
-  every i := 2 to *limits do
-    limits[i] := round(limits[i-1] + width)
-
-  return limits
+  return {
+    (lms := list(bars + 1))[1] := mi
+      every i := 2 to *lms do
+        lms[i] := round(lms[i - 1] + width); lms
+  }
 
 end
 
-procedure getFrequencies(bars,limits,d)
+procedure getFrequencies(bars, limits, d)
 
   # Calculate frequencies
-  frequencies := list(bars,0) ; fIndex := 1
-  every v := !d do
-    (if v <= limits[fIndex+1] then
-      frequencies[fIndex] else
-      fIndex)
-    +:= 1
-
-  return frequencies
+  return {
+    fqs := list(bars, 0) ; fIndex := 1
+    every v := !d do
+      (if v <= limits[fIndex + 1] then
+        fqs[fIndex] else
+        fIndex)
+      +:= 1; fqs
+  }
 
 end
 
@@ -93,17 +86,14 @@ procedure main()
 
   w := open("Histogram", "g")
 
-  # Number of data
-  s := 100
-
-  # Data
-  d := createSortedData(s)
+  # Generate s values
+  d := createSortedData(s := 100)
 
   # Calculate histogram properties
   h := getHistogramData(d)
 
   # Display histogram
-  drawHistogram(h,w)
+  drawHistogram(h, w)
   WSync()
 
   # Display data on command line

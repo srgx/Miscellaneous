@@ -1,5 +1,6 @@
 *.err
 *.pdf
+*.u
 _build
 a.out
 auto.nlg

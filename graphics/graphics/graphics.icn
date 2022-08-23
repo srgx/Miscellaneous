@@ -1,0 +1,51 @@
+
+# Graphics
+
+procedure main()
+
+  &window := open("Graphics", "g")
+
+  fns := table()
+  fns["l"] := DrawLine
+  fns["r"] := DrawRectangle
+  fns["f"] := FillRectangle
+  fns["d"] := DrawCircle
+  fns["g"] := FillCircle
+
+  ch := &digits ++ &letters
+
+  while line := read() do {
+
+    line ? {
+      if line[1] ~== ";" then {
+
+        fn := tab(upto(' ')) ; ar := list(4);
+
+        i := 0
+        while tab(upto(ch)) do
+          ar[i +:= 1] := tab(many(ch));
+
+      }
+    }
+
+    if member(fns,fn) then
+      fns[fn](toReals(ar)[1], ar[2], ar[3], ar[4])
+    else if "c" == fn then {
+      Fg(ar[1])
+    } else {
+      stop("Error")
+    }
+
+  }
+
+  WSync()
+
+  delay(5e3)
+
+  close(&window)
+
+end
+
+procedure toReals(L)
+  return { every i := 1 to *L do L[i] := real(L[i]); L }
+end

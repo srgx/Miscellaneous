@@ -99,6 +99,7 @@ Various small programs
 * [Cannonball](graphics/cannon.tcl)
 * [Diffusion-limited aggregation](graphics/dla.tcl)
 * [Game of life](graphics/game.rb)
+* [Graphics](graphics/graphics)
 * [Histogram](graphics/histogram.icn)
 * [Langton's ant](graphics/langton.tcl)
 * [Lightning](graphics/lightning.tcl)

@@ -1,4 +1,4 @@
-# Miscellaneous
+# ![Logo](https://i.imgur.com/2qPx0yY.png)
 
 Various small programs
 

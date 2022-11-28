@@ -1,0 +1,133 @@
+
+link random
+
+# ---------------------------------------------------------
+
+# Teams
+
+# ---------------------------------------------------------
+
+global groupSize, numGroups, symbols
+
+record group(symbol,teams)
+record team(name,points)
+
+# ---------------------------------------------------------
+
+procedure readTeams()
+
+  local numTeams, f, teams, i
+
+  numTeams := groupSize * numGroups
+
+  f := open("teams.txt","r")
+
+  teams := list(numTeams)
+
+  every i := 1 to numTeams do {
+    teams[i] := team(read(f),)
+  }
+
+  close(f)
+
+  return teams
+
+end
+
+procedure shuffleTeams(teams)
+
+  randomize()
+  every 1 to 100 do {
+    ?teams :=: ?teams
+  }
+
+  return
+
+end
+
+procedure createGroups(teams)
+
+  local index, grps, i, grp, j
+
+  index := 1
+
+  grps := list(numGroups)
+
+  every i := 1 to numGroups do {
+
+    grp := group(symbols[i],list(4))
+
+    every j := 1 to groupSize do {
+      grp.teams[j] := teams[index]
+      index +:= 1
+    }
+
+    grps[i] := grp
+
+  }
+
+  return grps
+
+end
+
+procedure showGroups(groups)
+
+  local g, t
+
+  every g := !groups do {
+
+    write("Group ",g.symbol)
+    writes("| ")
+    every t := (!g.teams).name do {
+      writes(t," | ")
+    }
+
+    write()
+
+  }
+
+  return
+
+end
+
+procedure initGlobal()
+  groupSize := 4
+  numGroups := 8
+  symbols := &ucase[1:9]
+  return
+end
+
+procedure groupStage(groups)
+
+  local grp
+
+  every grp := !groups do {
+  }
+
+  return groups
+
+end
+
+# ---------------------------------------------------------
+
+procedure main()
+
+  local teams, groups
+
+  initGlobal()
+
+  teams := readTeams()
+
+  shuffleTeams(teams)
+
+  groups := createGroups(teams)
+
+  showGroups(groups)
+
+  groupStage(groups)
+
+end
+
+# ---------------------------------------------------------
+
+

@@ -85,6 +85,7 @@ Various small programs
 * [Sudoku](console/sudoku)
 * [Systolic array](console/systolic.tcl)
 * [Tarot](console/tarot.exs)
+* [Teams](console/teams)
 * [Time](console/time.tcl)
 * [Travelling salesman](console/travel.ex)
 * [Vectors](console/displacement.tcl)

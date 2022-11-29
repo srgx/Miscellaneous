@@ -25,7 +25,7 @@ procedure readTeams()
   teams := list(numTeams)
 
   every i := 1 to numTeams do {
-    teams[i] := team(read(f),)
+    teams[i] := team(read(f),0)
   }
 
   close(f)
@@ -74,6 +74,12 @@ procedure showGroups(groups)
 
   local g, t
 
+  line()
+
+  write("Stage 0")
+
+  line()
+
   every g := !groups do {
 
     write("Group ",g.symbol)
@@ -83,6 +89,34 @@ procedure showGroups(groups)
     }
 
     write()
+
+  }
+
+  line()
+
+  return
+
+end
+
+procedure showPoints(groups)
+
+  local grp, tms, tm, i
+
+  line()
+  write("Points")
+
+  every grp := !groups do {
+
+    line()
+
+    tms := grp.teams
+
+    write("Group ",grp.symbol, " points")
+    line()
+    every i := 1 to *tms do {
+      writes(tms[i].name," ",tms[i].points)
+      write(if i = (3 | 4) then " (q)" else "")
+    }
 
   }
 
@@ -97,15 +131,200 @@ procedure initGlobal()
   return
 end
 
-procedure groupStage(groups)
+procedure stage1(eightGroups)
 
-  local grp
+  local grp, tms, s, i, j, iG, jG
 
-  every grp := !groups do {
+  write("Stage 1")
+
+  # All groups
+  every grp := !eightGroups do {
+
+    tms := grp.teams
+    s := grp.symbol
+
+    line()
+
+    # Show group
+    write("Group ",s)
+
+    # Play
+    every i := 1 to (groupSize - 1) do {
+
+      every j := (i + 1) to groupSize do {
+
+        # Play game
+        # Draw is possible
+        iG := ?4-1; jG := ?4-1
+        write(tms[i].name," ",iG," - ",jG," ",tms[j].name)
+
+        # Add points
+        if iG = jG then {
+          tms[i].points +:= 1
+          tms[j].points +:= 1
+        } else {
+          tms[if iG < jG then j else i].points +:= 3
+        }
+
+      }
+
+    }
+
+    # Sort teams in group
+    grp.teams := sortf(tms,2)
+
   }
 
-  return groups
+  return
 
+end
+
+procedure stage2(eightGroups)
+
+  local eightTeams, i, a, b, ix, c, d, fs
+
+  line()
+  write("Stage 2 (1/8)")
+  line()
+
+  # Eight teams in quarterfinals
+  eightTeams := list(8)
+
+  # Eight matches
+  every i := 1 to numGroups by 2 do {
+
+    # First group
+    a := pull(eightGroups[i].teams)
+    b := pull(eightGroups[i].teams)
+
+    # Second group
+    ix := i + 1
+    c := pull(eightGroups[ix].teams)
+    d := pull(eightGroups[ix].teams)
+
+    # First - Second
+    fs := play()
+    write(a.name," ",fs[1]," - ",fs[2]," ",d.name)
+    eightTeams[i] := if fs[1] > fs[2] then a else d
+
+    # Second - First
+    fs := play()
+    write(b.name," ",fs[1]," - ",fs[2]," ",c.name)
+    eightTeams[i+1] := if fs[1] > fs[2] then b else c
+
+  }
+
+  # Return eight teams
+  return eightTeams
+
+end
+
+procedure stage3(eightTeams)
+
+  local c, fourTeams, i, fs
+
+  line()
+  write("Stage 3 (1/4)")
+  line()
+
+  # Four teams in semifinal
+  fourTeams := list(4)
+
+  # Four matches
+  c := 1
+  every i := 1 to 8 by 2 do {
+
+    fs := play()
+    write(eightTeams[i].name," ",fs[1]," - ",fs[2]," ",eightTeams[i+1].name)
+    fourTeams[c] := eightTeams[i + if fs[1] < fs[2] then 1 else 0]
+    c +:= 1
+
+  }
+
+  # Return four teams
+  return fourTeams
+
+end
+
+procedure stage4(fourTeams)
+
+  local c, twoTeams, i, fs
+
+  line()
+  write("Stage 4 (1/2)")
+  line()
+
+  # Two teams in final
+  twoTeams := list(2)
+
+  # Two matches
+  c := 1
+  every i := 1 to 4 by 2 do {
+
+    fs := play()
+    write(fourTeams[i].name," ",fs[1]," - ",fs[2]," ",fourTeams[i+1].name)
+    twoTeams[c] := fourTeams[i + if fs[1] < fs[2] then 1 else 0]
+    c +:= 1
+
+  }
+
+  # Return final pair
+  return twoTeams
+
+end
+
+procedure final(twoTeams)
+
+  local fs
+
+  line()
+  write("Final")
+  line()
+
+  # Final match
+  fs := play()
+  write(twoTeams[1].name," ",fs[1]," - ",fs[2]," ",twoTeams[2].name)
+
+  line()
+  write("Winner: ",twoTeams[if fs[1] > fs[2] then 1 else 2].name)
+  line()
+
+  return
+
+end
+
+procedure play()
+
+  local f, s
+
+  f := s := 0
+  while f = s do {
+    f := ?4-1 ; s := ?4-1
+  }
+
+  return [f,s]
+
+end
+
+procedure finals(eightGroups)
+
+  # First stage
+  # Add points and sort groups
+  stage1(eightGroups)
+
+  # Show points
+  showPoints(eightGroups)
+
+  # All stages
+  final(stage4(stage3(stage2(eightGroups))))
+
+  return
+
+end
+
+procedure line()
+  write(repl("-",60))
+  return
 end
 
 # ---------------------------------------------------------
@@ -114,17 +333,23 @@ procedure main()
 
   local teams, groups
 
+  # Initialize global variables
   initGlobal()
 
+  # Read teams from file
   teams := readTeams()
 
+  # Randomize
   shuffleTeams(teams)
 
+  # Create groups
   groups := createGroups(teams)
 
+  # Show groups
   showGroups(groups)
 
-  groupStage(groups)
+  # Play
+  finals(groups)
 
 end
 

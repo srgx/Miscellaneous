@@ -88,6 +88,7 @@ Various small programs
 1. [Teams](console/teams)
 1. [Time](console/time.tcl)
 1. [Travelling salesman](console/travel.ex)
+1. [Universe](console/universe.sno)
 1. [Vectors](console/displacement.tcl)
 
 ### Graphics

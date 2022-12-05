@@ -1,0 +1,179 @@
+***********************************************************
+* Universe
+***********************************************************
+
+  define('show_points(pts)i,j,str') :(end_show_points)
+show_points
+
+*  Initialize string
+   str = ''
+
+*  Loop through points
+   i = 1
+a  ?lt(i,5) :f(d)
+
+*  Append point
+   j = 1
+b  ?gt(j,2) :s(c)
+   str = str pts<i,j> ' '
+   j = j + 1 :(b)
+
+*  Next point
+c  str = str '| '
+   i = i + 1 :(a)
+
+*  Show points
+d  output = str :(return)
+
+end_show_points
+
+***********************************************************
+
+  define('create_points(pts)') :(end_create_points)
+create_points
+
+* Initialize array
+  pts = array('4,2')
+
+* Set square points
+  pts[1,1] = 100 ; pts[1,2] = 100
+  pts[2,1] = 200 ; pts[2,2] = 100
+  pts[3,1] = 100 ; pts[3,2] = 200
+  pts[4,1] = 200 ; pts[4,2] = 200
+
+* Return square
+  create_points = pts :(return)
+
+end_create_points
+
+***********************************************************
+
+  define('center_of_mass(pts)cntr,i,j,dv') :(center_of_mass_end)
+center_of_mass
+
+*  Point with default value of zero
+   cntr = array('2',0)
+
+*  Sum positions
+   i = 1
+e  ?lt(i,5) :f(f)
+   j = 1
+g  ?gt(j,2) :s(h)
+   cntr<j> = cntr<j> + pts<i,j>
+   j = j + 1 :(g)
+h  i = i + 1 :(e)
+
+*  Calculate center of mass
+f  dv = 4.0
+   cntr<1> = cntr<1> / dv
+   cntr<2> = cntr<2> / dv
+
+   center_of_mass = cntr :(return)
+
+center_of_mass_end
+
+***********************************************************
+
+  define('vectors(pts,cntr)vcs,i,j,mag') :(vectors_end)
+vectors
+
+*  Initialize result
+   vcs = array('4,2')
+
+   i = 1
+k  ?gt(i,4) :s(i)
+   j = 1
+m  ?lt(j,3) :f(j)
+
+*  Subtract vectors
+   vcs<i,j> = pts<i,j> - cntr<j>
+
+*  Unit vector
+   ?eq(j,2) :f(l)
+   mag = sqrt(vcs<i,1> ^ 2 + vcs<i,2> ^ 2)
+   vcs<i,1> = vcs<i,1> / mag
+   vcs<i,2> = vcs<i,2> / mag
+
+l  j = j + 1 :(m)
+j  i = i + 1 :(k)
+
+i  vectors = vcs :(return)
+
+vectors_end
+
+***********************************************************
+
+  define('line()') :(line_end)
+line
+  output = dupl('-',50) :(return)
+line_end
+
+***********************************************************
+
+  define('universe()pts,cntr,vcs,i,j,k,str,fctr') :(universe_end)
+universe
+
+*  Vector magnitude
+   fctr = 76
+
+*  Create square points
+   pts = create_points()
+
+   line()
+
+*  Show points
+   output = 'Points'
+   show_points(pts)
+
+*  Set center of mass
+   cntr = center_of_mass(pts)
+   output = 'Center of mass'
+   output = cntr<1> ' ' cntr<2>
+
+*  Calculate unit vectors
+   vcs = vectors(pts,cntr)
+
+   line()
+   output = 'Expansion of the universe'
+   line()
+
+*  Number of steps
+   i = 1
+r  ?lt(i,5) :f(s)
+
+*  Points
+   j = 1
+o  ?lt(j,5) :f(n)
+
+*  Initialize point string
+   str = j ': '
+   k = 1
+q  ?lt(k,3) :f(p)
+
+*  Update position
+   pts<j,k> = pts<j,k> + vcs<j,k> * fctr
+
+*  Append to string
+   str = str pts<j,k> ' '
+   k = k + 1 :(q)
+
+*  Display new position
+p  output = str
+
+*  Next point
+   j = j + 1 :(o)
+
+*  Next step
+n  line()
+   i = i + 1 :(r)
+
+s  :(return)
+
+universe_end
+
+***********************************************************
+
+  universe()
+end
+
+***********************************************************

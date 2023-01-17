@@ -102,6 +102,7 @@ Various small programs
 1. [Diffusion-limited aggregation](graphics/dla.tcl)
 1. [Game of life](graphics/game.rb)
 1. [Graphics](graphics/graphics)
+1. [Heart](graphics/heart.tcl)
 1. [Histogram](graphics/histogram.icn)
 1. [Langton's ant](graphics/langton.tcl)
 1. [Lightning](graphics/lightning.tcl)

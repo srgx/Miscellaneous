@@ -74,6 +74,7 @@ Various small programs
 1. [Half-life](console/half_life.tcl)
 1. [Hydrocarbons](console/hydrocarbons.cs)
 1. [Logic programming](console/logic)
+1. [Minesweeper](console/mines.art)
 1. [Monkey language](console/monkey.ex)
 1. [Morse code](console/morse)
 1. [Mortgage](console/money.ndf)

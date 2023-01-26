@@ -1,0 +1,335 @@
+
+; -----------------------------------------------------------------------------
+
+; Minesweeper
+
+; -----------------------------------------------------------------------------
+
+; Place/Remove flag - 'f row col'
+; Place/Remove question mark - 'q row col'
+; Reveal field - 'r row col'
+
+; -----------------------------------------------------------------------------
+
+; Game class
+define :game [
+
+  board
+  width
+  height
+  bombs
+  gameOver
+
+] [
+
+  init: [
+
+    ; Initialize fields
+    this\board: new []
+    this\width: this\width - 1
+    this\height: this\height - 1
+    this\bombs: this\bombs - 1
+    this\gameOver: false
+
+    ; Fill board
+    loop 0..this\height 'r [
+      row: new []
+      loop 0..this\width 'c [ 'row ++ to :field [] ]
+      this\board: this\board ++ @[row]
+    ]
+
+  ]
+
+]
+
+; Show game board
+showGame: function [this][
+
+  ensure -> is? :game this
+
+  ; Show fields in loops
+  loop 0..this\height 'r [
+    loop 0..this\width 'c [
+      showField this\board\[r]\[c]
+    ]
+    print ""
+  ]
+
+]
+
+; Place and count bombs
+placeBombs: function [this][
+
+  ensure -> is? :game this
+
+  ; Attempts
+  loop 0..this\bombs 'i [
+
+    ; Random position
+    row: random 0 this\height
+    col: random 0 this\width
+
+    ; Place bomb if it is not already here
+    if not? logical? this\board\[row]\[col]\bomb [
+      this\board\[row]\[col]\bomb: true
+      addAround this row col
+    ]
+
+  ]
+
+]
+
+; Increment bomb counters of adjacent fields
+addAround: function [this row col][
+
+  ensure -> is? :game this
+
+  prevCol: col - 1
+  nextCol: col + 1
+
+  prevRow: row - 1
+  nextRow: row + 1
+
+  if prevRow >= 0 [
+
+    ; Up
+    if integer? this\board\[prevRow]\[col]\bomb [
+      this\board\[prevRow]\[col]\bomb: this\board\[prevRow]\[col]\bomb + 1
+    ]
+
+    ; Up left
+    if and? [prevCol >= 0] [integer? this\board\[prevRow]\[prevCol]\bomb] [
+      this\board\[prevRow]\[prevCol]\bomb: this\board\[prevRow]\[prevCol]\bomb + 1
+    ]
+
+    ; Up right
+    if and? [nextCol =< this\width] [integer? this\board\[prevRow]\[nextCol]\bomb] [
+      this\board\[prevRow]\[nextCol]\bomb: this\board\[prevRow]\[nextCol]\bomb + 1
+    ]
+
+  ]
+
+  ; Left
+  if and? [prevCol >= 0] [integer? this\board\[row]\[prevCol]\bomb] [
+    this\board\[row]\[prevCol]\bomb: this\board\[row]\[prevCol]\bomb + 1
+  ]
+
+  ; Right
+  if and? [nextCol =< this\width] [integer? this\board\[row]\[nextCol]\bomb] [
+    this\board\[row]\[nextCol]\bomb: this\board\[row]\[nextCol]\bomb + 1
+  ]
+
+  if nextRow =< this\height [
+
+    ; Down
+    if integer? this\board\[nextRow]\[col]\bomb [
+      this\board\[nextRow]\[col]\bomb: this\board\[nextRow]\[col]\bomb + 1
+    ]
+
+    ; Down left
+    if and? [prevCol >= 0] [integer? this\board\[nextRow]\[prevCol]\bomb] [
+      this\board\[nextRow]\[prevCol]\bomb: this\board\[nextRow]\[prevCol]\bomb + 1
+    ]
+
+    ; Down right
+    if and? [nextCol =< this\width] [integer? this\board\[nextRow]\[nextCol]\bomb] [
+      this\board\[nextRow]\[nextCol]\bomb: this\board\[nextRow]\[nextCol]\bomb + 1
+    ]
+
+  ]
+
+]
+
+; Uncover field
+reveal: function[this row col][
+
+  ensure -> is? :game this
+
+  cstate: this\board\[row]\[col]\state
+
+  ; Already revealed
+  if "uncovered" = cstate [return false]
+
+  this\board\[row]\[col]\state: "uncovered"
+
+  ; Explosion
+  return logical? this\board\[row]\[col]\bomb
+
+]
+
+; Place flag
+flag: function[this row col][
+
+  ensure -> is? :game this
+
+  cstate: this\board\[row]\[col]\state
+
+  ; Can't place flag
+  if "uncovered" = cstate [return]
+
+  ; Toggle flag
+  s: "flag"
+  this\board\[row]\[col]\state: (cstate = s)?["covered"][s]
+
+]
+
+; Place question mark
+question: function[this row col][
+
+  ensure -> is? :game this
+
+  cstate: this\board\[row]\[col]\state
+
+  ; Can't place question mark
+  if "uncovered" = cstate [return]
+
+  ; Toggle question mark
+  s: "question"
+  this\board\[row]\[col]\state: (cstate = s)?["covered"][s]
+
+]
+
+; Check if there are free covered fields
+checkWin: function[this][
+  ensure -> is? :game this
+  return allUncoveredOrBomb this
+]
+
+allUncoveredOrBomb: function[this][
+
+  ;ensure -> is? :game this
+
+  loop 0..this\height 'r [
+    loop 0..this\width 'c [
+
+      ; Uncovered safe field
+      if coveredAndNotBomb this\board\[r]\[c] [
+        return false
+      ]
+
+    ]
+  ]
+
+  return true
+
+]
+
+; Process user input
+mainLoop: function [this][
+
+  ensure -> is? :game this
+
+  while [true][
+
+    ; Show game board
+    showGame this
+
+    ; Defeat
+    if this\gameOver [
+      print "GAME OVER"
+      break
+    ]
+
+    ; Win
+    if checkWin this [
+      print "YOU WIN"
+      break
+    ]
+
+    ; Read user input
+    inp: input ""
+    args: split.words inp
+
+    ; Check user input
+    if (size args) < 3 [
+      print "Not enough arguments"
+      continue
+    ]
+
+    ; Copy and convert values
+    f: args\0 r: to :integer args\1 c: to :integer args\2
+
+    ; Select function
+    case [f]
+      when? [="f"] -> flag this r c
+      when? [="q"] -> question this r c
+      when? [="r"] [
+        if reveal this r c [
+          this\gameOver: true
+        ]
+      ]
+
+  ]
+
+]
+
+; -----------------------------------------------------------------------------
+
+; Field class
+define :field [
+
+  ; true | numBombsAround
+  bomb
+
+  ; "uncovered" | "covered" | "flag" | "question"
+  state
+
+] [
+
+  ; Initially all fields are safe and covered
+  init: [
+    this\bomb: 0
+    this\state: "covered"
+  ]
+
+]
+
+; Display c/f/?/b or number of bombs around
+showField: function [this][
+
+  ensure -> is? :field this
+
+  ; Select field symbol
+  case [this\state]
+    when? [="covered"] -> prints "c"
+    when? [="flag"] -> prints "f"
+    when? [="question"] -> prints "?"
+    when? [="uncovered"] [
+      if? logical? this\bomb ->
+        prints "b"
+      else ->
+        prints (to :string this\bomb)
+    ]
+
+]
+
+; Uncovered bomb
+coveredAndNotBomb: function [fArg][
+  ensure -> is? :field fArg
+  return and? [not? logical? fArg\bomb] ["covered" = fArg\state]
+]
+
+; -----------------------------------------------------------------------------
+
+; Create game object
+playGame: function [width height attempts][
+
+  ; Arguments 2 3 and 4 are width, height
+  ; and number of attempts to place bomb
+  g: to :game [0 width height attempts 0]
+
+  ; Place bombs
+  placeBombs g
+
+  ; Run main loop
+  mainLoop g
+
+]
+
+; -----------------------------------------------------------------------------
+
+; Width: 5, Height: 3, Attempts: 2
+playGame 5 3 2
+
+; -----------------------------------------------------------------------------
+

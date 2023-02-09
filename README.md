@@ -82,6 +82,7 @@ Various small programs
 1. [Monkey language](console/monkey.ex)
 1. [Morse code](console/morse)
 1. [Mortgage](console/money.ndf)
+1. [Pascal Triangle](console/pascal.icl)
 1. [Pea](console/pea.tcl)
 1. [Professor & Rain](console/professor.r)
 1. [Scrollbar](console/marker.tcl)

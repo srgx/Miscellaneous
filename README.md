@@ -71,6 +71,7 @@ Various small programs
 1. [Christmas tree](console/tree.rkt)
 1. [Compare products](console/compare)
 1. [Convert](console/convert.tcl)
+1. [D'Hondt method](console/dhondt.m)
 1. [Elements](console/elements)
 1. [Equations](console/root.ndf)
 1. [Estimate Pi](console/pi.tcl)

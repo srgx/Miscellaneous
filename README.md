@@ -62,6 +62,10 @@ Various small programs
 
 ![Heart](https://i.imgur.com/ymJ8EUW.png)
 
+* Pict
+
+![Pict](https://i.imgur.com/HYQl7Vv.png)
+
 ## Table of Contents
 
 ### Console
@@ -115,5 +119,6 @@ Various small programs
 1. [Langton's ant](graphics/langton.tcl)
 1. [Lightning](graphics/lightning.tcl)
 1. [Philosophers](graphics/philosophers.tcl)
+1. [Pict](graphics/pict.rkt)
 1. [SSD](graphics/ssd.tcl)
 
